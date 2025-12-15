@@ -1,0 +1,121 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kas_autocare_user/domain/usecase/fetch_list_history.dart';
+import 'package:kas_autocare_user/presentation/cubit/get_detail_user_cubit.dart';
+import 'package:kas_autocare_user/presentation/cubit/logout_cubit.dart';
+import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
+
+import '../../../core/config/assets/app_icons.dart';
+import '../../../core/config/inject/depedency_injection.dart';
+import '../../../core/config/theme/app_colors.dart';
+import '../../cubit/list_history_cubit.dart';
+import '../history/history_page.dart';
+import '../home_page/home_page.dart';
+import '../profile/profile_page.dart';
+import '../voucher/voucher_page.dart';
+
+class Dashboard extends StatefulWidget {
+  const Dashboard({super.key});
+
+  @override
+  State<Dashboard> createState() => _DashboardState();
+}
+
+class _DashboardState extends State<Dashboard> {
+  int selectedIndex = 0;
+  final pageController = PageController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: PageView(
+          controller: pageController,
+          onPageChanged: (value) {
+            setState(() {
+              selectedIndex = value;
+            });
+          },
+          children: [
+            BlocProvider(
+              create: (_) => sl<GetDetailUserCubit>()..fetchDetailUser(),
+              child: HomePage(),
+            ),
+
+            BlocProvider(
+              create: (_) => sl<ListHistoryCubit>(),
+              child: HistoryPage(),
+            ),
+            // VoucherPage(),
+            MultiBlocProvider(
+              providers: [
+                BlocProvider(create: (_) => sl<LogoutCubit>()),
+                BlocProvider(
+                  create: (_) => sl<GetDetailUserCubit>()..fetchDetailUser(),
+                ),
+              ],
+
+              child: ProfilePage(),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 6,
+              offset: const Offset(0, -3),
+            ),
+          ],
+        ),
+        child: StylishBottomBar(
+          items: [
+            BottomBarItem(
+              icon: Image.asset(AppIcons.homeInactive),
+              selectedIcon: Image.asset(AppIcons.homeActive),
+              title: const Text('Beranda'),
+              selectedColor: AppColors.light.primary,
+              badgePadding: const EdgeInsets.only(left: 4, right: 4),
+            ),
+            BottomBarItem(
+              icon: Image.asset(AppIcons.historyInactive),
+              selectedIcon: Image.asset(AppIcons.historyActive),
+              title: const Text('Riwayat'),
+              selectedColor: AppColors.light.primary,
+              badgePadding: const EdgeInsets.only(left: 4, right: 4),
+            ),
+
+            // BottomBarItem(
+            //   icon: Image.asset(AppIcons.voucherInactive),
+            //   selectedIcon: Image.asset(AppIcons.voucherActive),
+            //   title: const Text('Voucher'),
+            //   selectedColor: AppColors.light.primary,
+            //   badgePadding: const EdgeInsets.only(left: 4, right: 4),
+            // ),
+            BottomBarItem(
+              icon: Image.asset(AppIcons.profileInactive),
+              selectedIcon: Image.asset(AppIcons.profileActive),
+              title: const Text('Profile'),
+              selectedColor: AppColors.light.primary,
+              badgePadding: const EdgeInsets.only(left: 4, right: 4),
+            ),
+          ],
+          option: AnimatedBarOptions(iconStyle: IconStyle.Default),
+          hasNotch: false,
+
+          currentIndex: selectedIndex,
+          notchStyle: NotchStyle.square,
+          onTap: (index) {
+            if (index == selectedIndex) return;
+            pageController.jumpToPage(index);
+            setState(() {
+              selectedIndex = index;
+            });
+          },
+        ),
+      ),
+    );
+  }
+}
