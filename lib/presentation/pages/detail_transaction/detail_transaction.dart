@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kas_autocare_user/domain/entities/package_entity.dart';
+import 'package:kas_autocare_user/presentation/cubit/generate_qr_cubit.dart';
 import 'package:saver_gallery/saver_gallery.dart';
 
 import '../../../core/config/assets/app_icons.dart';
@@ -37,6 +38,21 @@ class _DetailBookingTransactionPageState
   @override
   Widget build(BuildContext context) {
     double maxH = MediaQuery.of(context).size.height;
+
+    void generateQr() async {
+      try {
+        setState(() {
+          isLoading = true;
+        });
+        context.read<GenerateQrCubit>().getGenerateQrServiceCubit(widget.id);
+      } catch (e) {
+        print(e);
+      } finally {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
 
     Future<void> saveQrGallery(
       WinpayResponse parsedData, {
@@ -158,6 +174,69 @@ class _DetailBookingTransactionPageState
         ); // return Future
       },
       child: ContainerScreen(
+        bottomNavigationBar:
+            BlocBuilder<DetailHistoryCubit, DetailHistoryState>(
+              builder: (context, state) {
+                if (state is DetailHistoryLoaded) {
+                  if (state.data.status == 'pending') {
+                    return Container(
+                      color: AppColors.light.background,
+                      child: SafeArea(
+                        child: Padding(
+                          padding: const EdgeInsets.all(15),
+                          child: BlocConsumer<GenerateQrCubit, GenerateQrState>(
+                            listenWhen: (prev, curr) =>
+                                curr is GenerateQrStateSuccess ||
+                                curr is GenerateQrStateError,
+                            listener: (context, state) {
+                              if (state is GenerateQrStateSuccess) {
+                                context
+                                    .read<DetailHistoryCubit>()
+                                    .getDetailHistory(widget.id);
+                              }
+
+                              if (state is GenerateQrStateError) {
+                                showAppSnackBar(
+                                  context,
+                                  message: state.message,
+                                  type: SnackType.error,
+                                );
+                              }
+                            },
+                            builder: (context, state) {
+                              final bool isLoading =
+                                  state is GenerateQrStateLoading;
+
+                              return Row(
+                                children: [
+                                  Expanded(
+                                    child: AppElevatedButton(
+                                      text: isLoading
+                                          ? "Loading..."
+                                          : "Buat Kode Bayar",
+                                      onPressed: isLoading
+                                          ? null
+                                          : () {
+                                              context
+                                                  .read<GenerateQrCubit>()
+                                                  .getGenerateQrServiceCubit(
+                                                    widget.id,
+                                                  );
+                                            },
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                }
+                return SizedBox.shrink();
+              },
+            ),
         ontap: () {
           context.go('/dashboard');
         },

@@ -280,8 +280,14 @@ class MyApp extends StatelessWidget {
         path: '/detail-booking-transaction',
         builder: (context, state) {
           final trxId = state.extra as int;
-          return BlocProvider(
-            create: (_) => sl<DetailHistoryCubit>()..getDetailHistory(trxId),
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                create: (_) =>
+                    sl<DetailHistoryCubit>()..getDetailHistory(trxId),
+              ),
+              BlocProvider(create: (_) => sl<GenerateQrCubit>()),
+            ],
             child: DetailBookingTransactionPage(id: trxId),
           );
         },

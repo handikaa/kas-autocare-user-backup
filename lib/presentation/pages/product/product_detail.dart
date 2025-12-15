@@ -300,38 +300,38 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           ),
 
                           AppGap.height(18),
-                          Row(
-                            children: [
-                              _buildSectionTitle("Rating & Reviews 10"),
-                              Spacer(),
-                              GestureDetector(
-                                onTap: () => context.push('/reviews-product'),
-                                child: AppText(
-                                  'Lihat Semua',
-                                  variant: TextVariant.body2,
-                                  weight: TextWeight.medium,
-                                  color: AppColors.light.primary,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              RatingBarIndicator(
-                                rating: 3.4,
-                                itemCount: 5,
-                                itemSize: 18,
-                                itemBuilder: (_, __) =>
-                                    const Icon(Icons.star, color: Colors.amber),
-                              ),
-                              AppGap.width(8),
-                              AppText('3.0', variant: TextVariant.body3),
-                            ],
-                          ),
+                          // Row(
+                          //   children: [
+                          //     _buildSectionTitle("Rating & Reviews 10"),
+                          //     Spacer(),
+                          //     GestureDetector(
+                          //       onTap: () => context.push('/reviews-product'),
+                          //       child: AppText(
+                          //         'Lihat Semua',
+                          //         variant: TextVariant.body2,
+                          //         weight: TextWeight.medium,
+                          //         color: AppColors.light.primary,
+                          //       ),
+                          //     ),
+                          //   ],
+                          // ),
+                          // Row(
+                          //   children: [
+                          //     RatingBarIndicator(
+                          //       rating: 3.4,
+                          //       itemCount: 5,
+                          //       itemSize: 18,
+                          //       itemBuilder: (_, __) =>
+                          //           const Icon(Icons.star, color: Colors.amber),
+                          //     ),
+                          //     AppGap.width(8),
+                          //     AppText('3.0', variant: TextVariant.body3),
+                          //   ],
+                          // ),
 
-                          AppGap.height(16),
-                          ...dummyP.reviews.take(3).map(_buildReviewItem),
-                          AppGap.height(16),
+                          // AppGap.height(16),
+                          // ...dummyP.reviews.take(3).map(_buildReviewItem),
+                          // AppGap.height(16),
                         ],
                       ),
                     ),
