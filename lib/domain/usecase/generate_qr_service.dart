@@ -8,7 +8,13 @@ class GenerateQrService {
 
   GenerateQrService(this.repositoriesDomain);
 
-  Future<Either<String, QrProductEntity>> execute(int id) async {
-    return await repositoriesDomain.generateQRService(id);
+  Future<Either<String, QrProductEntity>> execute({
+    required int id,
+    required int idMerchant,
+  }) async {
+    return await repositoriesDomain.generateQRService(
+      id: id,
+      idMerchant: idMerchant,
+    );
   }
 }

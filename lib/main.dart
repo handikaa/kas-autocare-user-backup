@@ -279,16 +279,16 @@ class MyApp extends StatelessWidget {
       GoRoute(
         path: '/detail-booking-transaction',
         builder: (context, state) {
-          final trxId = state.extra as int;
+          final data = state.extra as PaymentData;
           return MultiBlocProvider(
             providers: [
               BlocProvider(
                 create: (_) =>
-                    sl<DetailHistoryCubit>()..getDetailHistory(trxId),
+                    sl<DetailHistoryCubit>()..getDetailHistory(data.id),
               ),
               BlocProvider(create: (_) => sl<GenerateQrCubit>()),
             ],
-            child: DetailBookingTransactionPage(id: trxId),
+            child: DetailBookingTransactionPage(data: data),
           );
         },
       ),
@@ -378,10 +378,17 @@ class MyApp extends StatelessWidget {
       GoRoute(
         path: '/detail-transaction-product',
         builder: (context, state) {
-          final trxId = state.extra as int;
-          return BlocProvider(
-            create: (_) => sl<DetailHistoryCubit>()..getDetailHistory(trxId),
-            child: DetailTransactionProduct(trxId: trxId),
+          final data = state.extra as PaymentData;
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                create: (_) =>
+                    sl<DetailHistoryCubit>()..getDetailHistory(data.id),
+              ),
+              BlocProvider(create: (_) => sl<GenerateQrCubit>()),
+            ],
+
+            child: DetailTransactionProduct(data: data),
           );
         },
       ),

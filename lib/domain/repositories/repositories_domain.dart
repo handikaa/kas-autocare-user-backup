@@ -68,8 +68,14 @@ abstract class RepositoriesDomain {
   Future<Either<String, ProductEntity>> getDetailProduct(int id);
   Future<Either<String, String>> addChartProduct(AddChartParams params);
   Future<Either<String, int>> checkoutProduct(CheckoutPayload payload);
-  Future<Either<String, QrProductEntity>> generateQRProduct(int id);
-  Future<Either<String, QrProductEntity>> generateQRService(int id);
+  Future<Either<String, QrProductEntity>> generateQRProduct({
+    required int id,
+    required int idMerchant,
+  });
+  Future<Either<String, QrProductEntity>> generateQRService({
+    required int id,
+    required int idMerchant,
+  });
   Future<Either<String, List<ChartEntity>>> getListChart();
   Future<Either<String, CheckShippingEntity>> getListShipping(
     ShippingParams params,

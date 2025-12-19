@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 class BookingPayload {
-  final int userId;
+  final int? userId;
   final int branchId;
   final int? customersId;
   final String licensePlate;
@@ -21,7 +21,7 @@ class BookingPayload {
 
   BookingPayload({
     required this.variantNewsId,
-    required this.userId,
+    this.userId,
     required this.branchId,
     this.customersId,
     required this.licensePlate,

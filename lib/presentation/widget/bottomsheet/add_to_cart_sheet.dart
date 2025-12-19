@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -114,6 +116,10 @@ class _AddToCartSheetState extends State<AddToCartSheet> {
       userId: 384,
       qty: quantity,
     );
+
+    debugPrint("===== ADD CHART PAYLOAD =====");
+    debugPrint(const JsonEncoder.withIndent('  ').convert(params.toJson()));
+    debugPrint("============================");
 
     context.read<AddToCartCubit>().addToCart(params);
   }
@@ -385,11 +391,10 @@ class _AddToCartSheetState extends State<AddToCartSheet> {
 
               if (state is AddToCartError) {
                 context.pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.message),
-                    backgroundColor: Colors.red,
-                  ),
+                showAppSnackBar(
+                  context,
+                  message: state.message,
+                  type: SnackType.error,
                 );
               }
             },

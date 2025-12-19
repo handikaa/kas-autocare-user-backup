@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kas_autocare_user/data/model/payment_data.dart';
 import 'package:kas_autocare_user/domain/entities/package_entity.dart';
 import 'package:kas_autocare_user/presentation/cubit/generate_qr_cubit.dart';
 import 'package:saver_gallery/saver_gallery.dart';
@@ -22,8 +23,8 @@ import '../../widget/icon/app_circular_loading.dart';
 import '../../widget/widget.dart';
 
 class DetailBookingTransactionPage extends StatefulWidget {
-  final int id;
-  const DetailBookingTransactionPage({super.key, required this.id});
+  final PaymentData data;
+  const DetailBookingTransactionPage({super.key, required this.data});
 
   @override
   State<DetailBookingTransactionPage> createState() =>
@@ -44,7 +45,10 @@ class _DetailBookingTransactionPageState
         setState(() {
           isLoading = true;
         });
-        context.read<GenerateQrCubit>().getGenerateQrServiceCubit(widget.id);
+        context.read<GenerateQrCubit>().getGenerateQrServiceCubit(
+          id: widget.data.subMerchant,
+          idMerchant: widget.data.subMerchant,
+        );
       } catch (e) {
         print(e);
       } finally {
@@ -170,7 +174,7 @@ class _DetailBookingTransactionPageState
       color: AppColors.common.white,
       onRefresh: () {
         return context.read<DetailHistoryCubit>().getDetailHistory(
-          widget.id,
+          widget.data.id,
         ); // return Future
       },
       child: ContainerScreen(
@@ -192,7 +196,7 @@ class _DetailBookingTransactionPageState
                               if (state is GenerateQrStateSuccess) {
                                 context
                                     .read<DetailHistoryCubit>()
-                                    .getDetailHistory(widget.id);
+                                    .getDetailHistory(widget.data.id);
                               }
 
                               if (state is GenerateQrStateError) {
@@ -220,7 +224,9 @@ class _DetailBookingTransactionPageState
                                               context
                                                   .read<GenerateQrCubit>()
                                                   .getGenerateQrServiceCubit(
-                                                    widget.id,
+                                                    id: widget.data.id,
+                                                    idMerchant:
+                                                        widget.data.subMerchant,
                                                   );
                                             },
                                     ),

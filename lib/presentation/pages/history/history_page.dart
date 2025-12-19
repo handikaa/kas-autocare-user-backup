@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kas_autocare_user/core/utils/app_snackbar.dart';
 import 'package:kas_autocare_user/core/utils/share_method.dart';
+import 'package:kas_autocare_user/data/model/payment_data.dart';
 import 'package:kas_autocare_user/data/params/history_params.dart';
 
 import '../../../core/config/theme/app_colors.dart';
@@ -106,30 +107,6 @@ class _HistoryPageState extends State<HistoryPage> {
     super.dispose();
   }
 
-  void _goToPage({
-    required String status,
-    required String type,
-    required String title,
-  }) {
-    switch (type) {
-      case "carwash":
-        if (status.toLowerCase() != 'pembayaran') {
-          context.push('/detail-booking-transaction', extra: status);
-        } else {
-          context.push('/payment-information', extra: status);
-        }
-      case "ppob" || "ticket":
-        if (status.toLowerCase() != 'pembayaran') {
-          context.push(
-            '/detail-ppob',
-            extra: {'status': status, 'title': title},
-          );
-        } else {
-          context.push('/payment-information', extra: status);
-        }
-    }
-  }
-
   Widget _buildHistoryCard(HistoryTransactionEntity item) {
     final transactionItem = item.transactionItems.isNotEmpty
         ? item.transactionItems.first
@@ -166,10 +143,12 @@ class _HistoryPageState extends State<HistoryPage> {
 
     return GestureDetector(
       onTap: () {
+        PaymentData? data = PaymentData(subMerchant: 0, id: item.id, type: '');
+        print("DEBUG : Id Merchant null try please call the developer");
         if (transactionItem?.itemType != 'product') {
-          context.push('/detail-booking-transaction', extra: item.id);
+          context.push('/detail-booking-transaction', extra: data);
         } else if (transactionItem?.itemType == 'product') {
-          context.push('/detail-transaction-product', extra: item.id);
+          context.push('/detail-transaction-product', extra: data);
         } else {
           showAppSnackBar(
             context,
@@ -249,89 +228,102 @@ class _HistoryPageState extends State<HistoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ContainerScreen(
-      title: "Riwayat",
-      scrollable: false,
-      hideBackButton: true,
-      body: [
-        _buildSearchFilterHistory(),
-        BlocConsumer<ListHistoryCubit, ListHistoryState>(
-          listener: (context, state) {
-            if (state is ListHistoryLoaded) {
-              final newData = state.data;
+    return RefreshIndicator(
+      backgroundColor: AppColors.light.primary,
+      color: AppColors.common.white,
+      onRefresh: () {
+        return context.read<ListHistoryCubit>().getListHistory(params, page: 1);
+      },
+      child: ContainerScreen(
+        title: "Riwayat",
+        scrollable: false,
+        hideBackButton: true,
+        body: [
+          _buildSearchFilterHistory(),
+          BlocConsumer<ListHistoryCubit, ListHistoryState>(
+            listener: (context, state) {
+              if (state is ListHistoryLoaded) {
+                final newData = state.data;
 
-              setState(() {
-                if (_isLoadingMore) {
-                  // mode load more → append
-                  if (newData.isEmpty) {
-                    _hasMore = false; // tidak ada data lagi
+                setState(() {
+                  if (_isLoadingMore) {
+                    // mode load more → append
+                    if (newData.isEmpty) {
+                      _hasMore = false; // tidak ada data lagi
+                    } else {
+                      _histories.addAll(newData);
+                    }
+                    _isLoadingMore = false;
                   } else {
-                    _histories.addAll(newData);
+                    // load pertama / refresh → replace
+                    _histories = newData;
                   }
+                });
+              }
+
+              if (state is ListHistoryError) {
+                setState(() {
                   _isLoadingMore = false;
-                } else {
-                  // load pertama / refresh → replace
-                  _histories = newData;
-                }
-              });
-            }
+                });
 
-            if (state is ListHistoryError) {
-              setState(() {
-                _isLoadingMore = false;
-              });
+                showAppSnackBar(
+                  context,
+                  message: state.message,
+                  type: SnackType.error,
+                );
+              }
+            },
+            builder: (context, state) {
+              // loading awal
+              if (state is ListHistoryLoading && _histories.isEmpty) {
+                return const Expanded(
+                  child: Center(child: AppCircularLoading()),
+                );
+              }
+              if (state is ListHistoryLoadingFilter) {
+                return const Expanded(
+                  child: Center(child: AppCircularLoading()),
+                );
+              }
 
-              showAppSnackBar(
-                context,
-                message: state.message,
-                type: SnackType.error,
+              final baseList = _searchController.text.isEmpty
+                  ? _histories
+                  : _filteredHistories;
+
+              if (baseList.isEmpty) {
+                return const Expanded(
+                  child: Center(child: Text("Data kosong")),
+                );
+              }
+
+              // // kalau mau sorted, bisa pakai sortedList di sini
+              // final sortedList = [
+              //   ..._histories.where((e) => e.status == "Proses"),
+              //   ..._histories.where((e) => e.status != "Proses"),
+              // ];
+
+              return Expanded(
+                child: ListView.builder(
+                  controller: _scrollController,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: baseList.length + (_isLoadingMore ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (_isLoadingMore && index == baseList.length) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Center(child: AppCircularLoading()),
+                      );
+                    }
+
+                    final data = baseList[index];
+                    return _buildHistoryCard(data);
+                  },
+                ),
               );
-            }
-          },
-          builder: (context, state) {
-            // loading awal
-            if (state is ListHistoryLoading && _histories.isEmpty) {
-              return const Expanded(child: Center(child: AppCircularLoading()));
-            }
-            if (state is ListHistoryLoadingFilter) {
-              return const Expanded(child: Center(child: AppCircularLoading()));
-            }
-
-            final baseList = _searchController.text.isEmpty
-                ? _histories
-                : _filteredHistories;
-
-            if (baseList.isEmpty) {
-              return const Expanded(child: Center(child: Text("Data kosong")));
-            }
-
-            // // kalau mau sorted, bisa pakai sortedList di sini
-            // final sortedList = [
-            //   ..._histories.where((e) => e.status == "Proses"),
-            //   ..._histories.where((e) => e.status != "Proses"),
-            // ];
-
-            return Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                physics: const BouncingScrollPhysics(),
-                itemCount: baseList.length + (_isLoadingMore ? 1 : 0),
-                itemBuilder: (context, index) {
-                  if (_isLoadingMore && index == baseList.length) {
-                    return const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      child: Center(child: AppCircularLoading()),
-                    );
-                  }
-
-                  final data = baseList[index];
-                  return _buildHistoryCard(data);
-                },
-              ),
-            );
-          },
-        ),
-      ],
+            },
+          ),
+        ],
+      ),
     );
   }
 

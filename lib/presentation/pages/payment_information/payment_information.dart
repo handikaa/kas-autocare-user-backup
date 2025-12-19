@@ -42,12 +42,18 @@ class _PaymentInformationPageState extends State<PaymentInformationPage> {
   void _fetchGenerateQr() {
     final cubit = context.read<GenerateQrCubit>();
 
-    final int id = widget.data.id;
+    final extra = widget.data;
 
     if (widget.data.type == 'service') {
-      cubit.getGenerateQrServiceCubit(id);
+      cubit.getGenerateQrServiceCubit(
+        id: extra.id,
+        idMerchant: extra.subMerchant,
+      );
     } else {
-      cubit.getGenerateQrProductCubit(id);
+      cubit.getGenerateQrProductCubit(
+        id: extra.id,
+        idMerchant: extra.subMerchant,
+      );
     }
   }
 
@@ -174,20 +180,21 @@ class _PaymentInformationPageState extends State<PaymentInformationPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: AppOutlineButton(
-                        text: isLoading ? "Mengunduh..." : "Download Qris",
-                        onPressed: isLoading
-                            ? null
-                            : () {
-                                _saveQrGallery();
-                              },
+                if (qrUrl != null)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: AppOutlineButton(
+                          text: isLoading ? "Mengunduh..." : "Download Qris",
+                          onPressed: isLoading
+                              ? null
+                              : () {
+                                  _saveQrGallery();
+                                },
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
                 AppGap.height(12),
                 Row(
                   children: [
@@ -198,12 +205,12 @@ class _PaymentInformationPageState extends State<PaymentInformationPage> {
                           if (widget.data.type == 'service') {
                             context.go(
                               '/detail-booking-transaction',
-                              extra: widget.data.id,
+                              extra: widget.data,
                             );
                           } else {
                             context.go(
                               '/detail-transaction-product',
-                              extra: widget.data.id,
+                              extra: widget.data,
                             );
                           }
                         },

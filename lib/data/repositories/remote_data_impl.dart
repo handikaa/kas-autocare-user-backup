@@ -303,9 +303,15 @@ class RepositoriesImpl implements RepositoriesDomain {
   }
 
   @override
-  Future<Either<String, QrProductEntity>> generateQRProduct(int id) async {
+  Future<Either<String, QrProductEntity>> generateQRProduct({
+    required int id,
+    required int idMerchant,
+  }) async {
     try {
-      final result = await remote.generateQRProduct(id);
+      final result = await remote.generateQRProduct(
+        id: id,
+        idMerchant: idMerchant,
+      );
 
       final entities = result.toEntity();
 
@@ -316,9 +322,15 @@ class RepositoriesImpl implements RepositoriesDomain {
   }
 
   @override
-  Future<Either<String, QrProductEntity>> generateQRService(int id) async {
+  Future<Either<String, QrProductEntity>> generateQRService({
+    required int id,
+    required int idMerchant,
+  }) async {
     try {
-      final result = await remote.generateQRService(id);
+      final result = await remote.generateQRService(
+        id: id,
+        idMerchant: idMerchant,
+      );
       final entities = result.toEntity();
 
       return Right(entities);

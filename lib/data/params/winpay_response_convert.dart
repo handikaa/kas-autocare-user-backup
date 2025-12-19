@@ -63,10 +63,19 @@ class WinpayAdditionalInfo {
 }
 
 class WinpayResponseProduct {
+  final String? responseCode;
+  final String? responseMessage;
+  final String partnerReferenceNo;
   final QrData qrData;
-  final WinpayInfo info;
+  final AdditionalInfo additionalInfo;
 
-  WinpayResponseProduct({required this.qrData, required this.info});
+  WinpayResponseProduct({
+    required this.responseCode,
+    required this.responseMessage,
+    required this.partnerReferenceNo,
+    required this.qrData,
+    required this.additionalInfo,
+  });
 
   factory WinpayResponseProduct.fromRawJson(String raw) {
     final decoded = json.decode(raw);
@@ -75,8 +84,11 @@ class WinpayResponseProduct {
 
   factory WinpayResponseProduct.fromJson(Map<String, dynamic> json) {
     return WinpayResponseProduct(
-      qrData: QrData.fromJson(json["qris"] ?? {}),
-      info: WinpayInfo.fromJson(json["info"] ?? {}),
+      responseCode: json["responseCode"],
+      responseMessage: json["responseMessage"],
+      partnerReferenceNo: json["partnerReferenceNo"] ?? "",
+      qrData: QrData.fromJson(json),
+      additionalInfo: AdditionalInfo.fromJson(json["additionalInfo"] ?? {}),
     );
   }
 }
@@ -84,14 +96,24 @@ class WinpayResponseProduct {
 class QrData {
   final String? qrContent;
   final String? qrUrl;
+
+  QrData({this.qrContent, this.qrUrl});
+
+  factory QrData.fromJson(Map<String, dynamic> json) =>
+      QrData(qrContent: json["qrContent"], qrUrl: json["qrUrl"]);
+}
+
+class AdditionalInfo {
   final String? contractId;
+  final String? expiredAt;
+  final bool? isStatic;
 
-  QrData({this.qrContent, this.qrUrl, this.contractId});
+  AdditionalInfo({this.contractId, this.expiredAt, this.isStatic});
 
-  factory QrData.fromJson(Map<String, dynamic> json) => QrData(
-    qrContent: json["qrContent"],
-    qrUrl: json["qrUrl"],
+  factory AdditionalInfo.fromJson(Map<String, dynamic> json) => AdditionalInfo(
     contractId: json["contractId"],
+    expiredAt: json["expiredAt"],
+    isStatic: json["isStatic"],
   );
 }
 

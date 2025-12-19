@@ -141,6 +141,9 @@ class ShareMethod {
       case "rejected":
         return AppColors.light.error;
 
+      case "canceled":
+        return AppColors.light.error;
+
       case "in_progress":
         return AppColors.common.lightOrange;
 
@@ -180,6 +183,9 @@ class ShareMethod {
 
       case "rejected":
         return "Ditolak";
+
+      case "canceled":
+        return "Transaksi Dibatalkan";
 
       case "pending":
         return "Pending";

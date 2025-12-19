@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
+import 'package:kas_autocare_user/data/model/sub_merchant_model.dart';
+import 'package:kas_autocare_user/domain/entities/sub_merchant_entity.dart';
 
 import '../../domain/entities/merchant_entity.dart';
 
@@ -37,9 +39,11 @@ class MerchantModel extends Equatable {
   final String? status;
   final String? ward;
   final double? distance;
+  final SubMerchantModel? subMerchant;
   final StoreStatusModel? storeStatus;
 
   const MerchantModel({
+    this.subMerchant,
     this.storeStatus,
     this.id,
     this.ownershipModelId,
@@ -134,6 +138,9 @@ class MerchantModel extends Equatable {
       storeStatus: json["store_status"] == null
           ? null
           : StoreStatusModel.fromJson(json["store_status"]),
+      subMerchant: json["sub_merchant"] == null
+          ? null
+          : SubMerchantModel.fromJson(json["sub_merchant"]),
     );
   }
 
@@ -173,6 +180,8 @@ class MerchantModel extends Equatable {
     storeStatus:
         storeStatus?.toEntity() ??
         StoreStatusEntity(isOpen: false, status: '', message: ''),
+    subMerchant:
+        subMerchant?.toEntity() ?? SubMerchantEntity(id: 0, idMerchant: 0),
   );
 
   @override

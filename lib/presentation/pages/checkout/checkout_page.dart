@@ -40,6 +40,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
   bool isCod = false;
 
   ShippingEntity? selectedExpedition;
+  ChartEntity? chart;
   ServiceDetailEntity? selectedService;
   PaymentMethod? _selectedPaymentMethod;
   AddressEntity? selectedAddress;
@@ -135,6 +136,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
   @override
   void initState() {
     super.initState();
+
+    chart = widget.products.first;
     checkoutPayload = _buildCheckoutPayload(widget.products);
   }
 
@@ -163,6 +166,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
           PaymentData dataPayment = PaymentData(
             id: state.data,
             type: 'product',
+            subMerchant: chart?.branch.subMerchant?.idMerchant ?? 0,
           );
           context.go('/payment-information', extra: dataPayment);
         }
@@ -203,7 +207,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         originId:
                             widget.products.first.branch.pickupPoint?.originId,
                         shipping: Shipping(
-                          courierCode: selectedExpedition!.courierCode,
+                          courierCode: selectedService!.serviceCode,
                           courierName: selectedExpedition!.courierName,
                           service: selectedService != null
                               ? Service(
@@ -251,9 +255,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
             Expanded(
               child: AppElevatedButton(
                 text: "Bayar",
-                onPressed: () => pay(),
-                // sValid == true ?
-                // : null,
+                onPressed: isValid == true ? () => pay() : null,
               ),
             ),
           ],
@@ -405,10 +407,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
           : () async {
               ShippingParams params = ShippingParams(
                 cartIds: widget.products.map((e) => e.id).toList(),
-                destinationId: selectedAddress!.id,
+                destinationId: selectedAddress!.districtId,
                 qty: widget.products[0].qty,
                 pickupPointId:
                     widget.products.first.branch.pickupPoint?.id ?? 0,
+                originId:
+                    widget.products.first.branch.pickupPoint?.originId ?? 0,
               );
 
               final result = await context.push<ShippingEntity>(
@@ -428,7 +432,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     originId:
                         widget.products.first.branch.pickupPoint?.originId,
                     shipping: Shipping(
-                      courierCode: selectedExpedition!.courierCode,
+                      courierCode: selectedService!.serviceCode,
                       courierName: selectedExpedition!.courierName,
                       service: selectedService != null
                           ? Service(

@@ -1,7 +1,10 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/config/theme/app_colors.dart';
@@ -56,6 +59,26 @@ class _FindLocationState extends State<FindLocation> {
     });
   }
 
+  Future<String?> getAddressFromPosition(Position position) async {
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+      if (kDebugMode) {
+        print("DEBUG : Result address by place mark $placemarks");
+      }
+      if (placemarks.isNotEmpty) {
+        final p = placemarks.first;
+
+        return "${p.locality} ${p.street}";
+      }
+    } catch (e) {
+      print("Error get address: $e");
+    }
+    return null;
+  }
+
   @override
   void dispose() {
     _findLocationController.removeListener(_onSearchChanged);
@@ -79,15 +102,17 @@ class _FindLocationState extends State<FindLocation> {
                 builder: (_) => const Center(child: AppCircularLoading()),
               );
 
-              final position = await ShareMethod.getCurrentUserLocation();
+              Position? position = await ShareMethod.getCurrentUserLocation();
               if (context.mounted) Navigator.pop(context);
 
               if (position != null) {
+                String? address = await getAddressFromPosition(position);
                 if (context.mounted) {
                   context.pop(
                     ParamsLocation(
                       lat: position.latitude,
                       long: position.longitude,
+                      city: address,
                     ),
                   );
                 }

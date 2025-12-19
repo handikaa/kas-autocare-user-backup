@@ -43,34 +43,41 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       backgroundColor: AppColors.light.background,
-      body: ListView(
-        children: [
-          Stack(
-            children: [
-              Container(
-                color: AppColors.light.primary,
-                height: heightDevice * 0.17,
-                width: widthDevice,
-              ),
+      body: RefreshIndicator(
+        backgroundColor: AppColors.light.primary,
+        color: AppColors.common.white,
+        onRefresh: () {
+          return context.read<GetDetailUserCubit>().fetchDetailUser();
+        },
+        child: ListView(
+          children: [
+            Stack(
+              children: [
+                Container(
+                  color: AppColors.light.primary,
+                  height: heightDevice * 0.17,
+                  width: widthDevice,
+                ),
 
-              Column(
-                children: [
-                  _profileAppbar(),
-                  AppGap.height(heightDevice * 0.01),
+                Column(
+                  children: [
+                    _profileAppbar(),
+                    AppGap.height(heightDevice * 0.01),
 
-                  // _findNearbyCarwash(widthDevice),
-                  // AppGap.height(38),
-                  _bannerInformation(),
+                    // _findNearbyCarwash(widthDevice),
+                    // AppGap.height(38),
+                    _bannerInformation(),
 
-                  AppGap.height(38),
-                  _menu(),
-                  AppGap.height(30),
-                  _topMerchant(),
-                ],
-              ),
-            ],
-          ),
-        ],
+                    AppGap.height(38),
+                    _menu(),
+                    AppGap.height(30),
+                    _topMerchant(),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

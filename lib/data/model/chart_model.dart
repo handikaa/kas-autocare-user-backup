@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
 import 'package:kas_autocare_user/core/utils/share_method.dart';
+import 'package:kas_autocare_user/data/model/sub_merchant_model.dart';
 import 'package:kas_autocare_user/data/model/user_model.dart';
 import 'package:kas_autocare_user/domain/entities/user_entity.dart';
 
@@ -206,8 +207,15 @@ class BranchModel {
   final String? name;
   final String? address;
   final PickupPointModel? pickupPointModel;
+  final SubMerchantModel? subMerchant;
 
-  BranchModel({this.pickupPointModel, this.id, this.name, this.address});
+  BranchModel({
+    this.subMerchant,
+    this.pickupPointModel,
+    this.id,
+    this.name,
+    this.address,
+  });
 
   factory BranchModel.fromJson(Map<String, dynamic> json) => BranchModel(
     id: json["id"],
@@ -215,6 +223,9 @@ class BranchModel {
     address: json["address"],
     pickupPointModel: json["pickup_points"] != null
         ? PickupPointModel.fromJson(json["pickup_points"])
+        : null,
+    subMerchant: json["sub_merchant"] != null
+        ? SubMerchantModel.fromJson(json["sub_merchant"])
         : null,
   );
 
@@ -236,6 +247,7 @@ class BranchModel {
     bussinesId: 0,
     status: '',
     ward: '',
+    subMerchant: subMerchant?.toEntity(),
     pickupPoint:
         pickupPointModel?.toEntity() ??
         PickupPointEntity(

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:kas_autocare_user/domain/entities/sub_merchant_entity.dart';
 
 class MerchantEntity extends Equatable {
   final int id;
@@ -34,8 +35,10 @@ class MerchantEntity extends Equatable {
   final String ward;
   final double distance;
   final StoreStatusEntity storeStatus;
+  final SubMerchantEntity subMerchant;
 
   const MerchantEntity({
+    required this.subMerchant,
     required this.storeStatus,
     required this.id,
     required this.ownershipModelId,
@@ -97,6 +100,7 @@ class MerchantEntity extends Equatable {
     docLocationPath,
     province,
     city,
+    subMerchant,
     district,
     pricingType,
     latitude,

@@ -102,12 +102,15 @@ class _StepTwoWidgetState extends State<StepTwoWidget> {
               padding: const EdgeInsets.all(12),
               child: Row(
                 children: [
-                  AppText(
-                    selectedCity ?? 'Cari Lokasi',
-                    variant: TextVariant.body2,
-                    weight: TextWeight.medium,
+                  Expanded(
+                    child: AppText(
+                      align: TextAlign.left,
+                      "${selectedCity ?? "Cari lokasi"} ",
+                      variant: TextVariant.body2,
+                      weight: TextWeight.medium,
+                    ),
                   ),
-                  const Spacer(),
+
                   Icon(
                     Icons.arrow_forward_ios_outlined,
                     color: AppColors.common.black,

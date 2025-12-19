@@ -51,6 +51,7 @@ dependencies:
   encrypt: ^5.0.3
   pinput: ^6.0.1
   custom_date_range_picker: ^1.2.0
+  geocoding: ^4.0.0
 
 dev_dependencies:
   flutter_test:

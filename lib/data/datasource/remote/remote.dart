@@ -75,8 +75,14 @@ abstract class Remote {
   });
   Future<String> deleteChart(int id);
   Future<int> checkout(CheckoutPayload payload);
-  Future<QrProductModel> generateQRProduct(int id);
-  Future<QrProductModel> generateQRService(int id);
+  Future<QrProductModel> generateQRProduct({
+    required int id,
+    required int idMerchant,
+  });
+  Future<QrProductModel> generateQRService({
+    required int id,
+    required int idMerchant,
+  });
   Future<CheckShippingModel> checkShipping(ShippingParams params);
 
   Future<List<DistrictModel>> getListDistrict(String? search);
@@ -532,7 +538,10 @@ class RemoteDataImpl implements Remote {
   }
 
   @override
-  Future<QrProductModel> generateQRProduct(int id) async {
+  Future<QrProductModel> generateQRProduct({
+    required int id,
+    required int idMerchant,
+  }) async {
     await getLocal();
 
     final result = await _handler.request(
@@ -551,14 +560,20 @@ class RemoteDataImpl implements Remote {
   }
 
   @override
-  Future<QrProductModel> generateQRService(int id) async {
+  Future<QrProductModel> generateQRService({
+    required int id,
+    required int idMerchant,
+  }) async {
     await getLocal();
 
     final result = await _handler.request(
       endpoint: ApiConstant.generateQRService,
       method: 'POST',
       headers: {"Authorization": "Bearer $lclTkn"},
-      data: {"transaction_news_id": id},
+      data: {
+        "transaction_news_id": id,
+        // "id_merchant": idMerchant.toString()
+      },
       withAuth: true,
     );
 

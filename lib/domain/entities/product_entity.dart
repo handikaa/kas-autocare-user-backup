@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:kas_autocare_user/domain/entities/sub_merchant_entity.dart';
 
 class ProductEntity extends Equatable {
   final int id;
@@ -156,8 +157,10 @@ class BranchEntity extends Equatable {
   final String status;
   final String ward;
   final PickupPointEntity? pickupPoint;
+  final SubMerchantEntity? subMerchant;
 
   const BranchEntity({
+    this.subMerchant,
     this.pickupPoint,
     required this.id,
     required this.ownershipModelId,
@@ -198,6 +201,7 @@ class BranchEntity extends Equatable {
     status,
     ward,
     pickupPoint,
+    subMerchant,
   ];
 }
 

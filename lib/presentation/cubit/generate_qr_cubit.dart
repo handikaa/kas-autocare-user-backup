@@ -1,3 +1,4 @@
+import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kas_autocare_user/domain/entities/qr_product_entity.dart';
@@ -14,10 +15,16 @@ class GenerateQrCubit extends Cubit<GenerateQrState> {
   GenerateQrCubit(this.generateQrProduct, this.generateQrService)
     : super(GenerateQrStateInitial());
 
-  Future<void> getGenerateQrProductCubit(int id) async {
+  Future<void> getGenerateQrProductCubit({
+    required int id,
+    required int idMerchant,
+  }) async {
     emit(GenerateQrStateLoading());
 
-    final result = await generateQrProduct.execute(id);
+    final result = await generateQrProduct.execute(
+      id: id,
+      idMerchant: idMerchant,
+    );
 
     result.fold(
       (l) => emit(GenerateQrStateError(l)),
@@ -25,10 +32,16 @@ class GenerateQrCubit extends Cubit<GenerateQrState> {
     );
   }
 
-  Future<void> getGenerateQrServiceCubit(int id) async {
+  Future<void> getGenerateQrServiceCubit({
+    required int id,
+    required int idMerchant,
+  }) async {
     emit(GenerateQrStateLoading());
 
-    final result = await generateQrService.execute(id);
+    final result = await generateQrService.execute(
+      id: id,
+      idMerchant: idMerchant,
+    );
 
     result.fold(
       (l) => emit(GenerateQrStateError(l)),

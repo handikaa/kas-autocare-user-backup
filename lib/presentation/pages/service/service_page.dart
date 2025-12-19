@@ -134,12 +134,9 @@ class _ServicePageState extends State<ServicePage> {
         : null;
 
     final payload = BookingPayload(
-      userId: 384,
-
       branchId: selectedMerchant?.id ?? 0,
       bussinesId: selectedMerchant?.bussinesId ?? 0,
       bussinesUnitId: selectedMerchant?.bussinesUnitId ?? 0,
-
       // selectedMerchant?.bussinesUnitId ?? 0,
       licensePlate: platController.text,
       vehicleType: vehicleType ?? "",
@@ -228,6 +225,7 @@ class _ServicePageState extends State<ServicePage> {
           PaymentData dataPayment = PaymentData(
             id: state.data,
             type: 'service',
+            subMerchant: selectedMerchant?.subMerchant.idMerchant ?? 0,
           );
           context.go('/payment-information', extra: dataPayment);
 
