@@ -52,6 +52,7 @@ dependencies:
   pinput: ^6.0.1
   custom_date_range_picker: ^1.2.0
   geocoding: ^4.0.0
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -64,3 +65,9 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/lotties/
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icons/ic.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
