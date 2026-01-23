@@ -57,6 +57,7 @@ import 'package:kas_autocare_user/presentation/cubit/verify_otp_cubit.dart';
 import '../../../data/datasource/remote/remote.dart';
 import '../../../data/repositories/remote_data_impl.dart';
 import '../../../domain/repositories/repositories_domain.dart';
+import '../../../domain/usecase/banner_carousel/get_list_banner_carousel_usecase.dart';
 import '../../../domain/usecase/create_vehicle_customer.dart';
 import '../../../domain/usecase/delete_address.dart';
 import '../../../domain/usecase/delete_chart.dart';
@@ -66,6 +67,7 @@ import '../../../domain/usecase/fetch_list_merchant_nearby.dart';
 import '../../../domain/usecase/fetch_list_vehicle_cust.dart';
 import '../../../domain/usecase/get_list_chart.dart';
 import '../../../domain/usecase/update_chart.dart';
+import '../../../presentation/cubit/banner_carousel_cubit/get_list_banner_cubit.dart';
 import '../../../presentation/cubit/brand_cubit.dart';
 import '../../../presentation/cubit/generate_qr_cubit.dart';
 import '../../../presentation/cubit/login_cubit.dart';
@@ -127,6 +129,7 @@ Future<void> init(String baseUrl) async {
   sl.registerLazySingleton(() => ForgotVerifyOtp(sl()));
   sl.registerLazySingleton(() => ResetPass(sl()));
   sl.registerLazySingleton(() => GetDetailUser(sl()));
+  sl.registerLazySingleton(() => GetListBannerCarouselUsecase(sl()));
 
   // Cubit
   sl.registerFactory(() => GetDetailUserCubit(sl<GetDetailUser>()));
@@ -150,6 +153,9 @@ Future<void> init(String baseUrl) async {
   sl.registerFactory(() => CheckoutCubit(sl<CheckoutProduct>()));
   sl.registerFactory(() => ListHistoryCubit(sl<FetchListHistory>()));
   sl.registerFactory(() => ListTimeCubit(sl<FetchListTime>()));
+  sl.registerFactory(
+    () => GetListBannerCubit(sl<GetListBannerCarouselUsecase>()),
+  );
   sl.registerFactory(
     () => RegisterCubit(sl<RegistCheckEmail>(), sl<RegisterUser>()),
   );

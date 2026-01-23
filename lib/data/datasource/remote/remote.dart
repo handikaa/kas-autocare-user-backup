@@ -8,6 +8,7 @@ import 'package:kas_autocare_user/data/params/register_payload.dart';
 import '../../../core/utils/api_constant.dart';
 import '../../model/address_model.dart';
 import '../../model/authentification_model.dart';
+import '../../model/baner_carousel/banner_carousel_model.dart';
 import '../../model/brand_model.dart';
 import '../../model/chart_model.dart';
 import '../../model/city_model.dart';
@@ -100,6 +101,7 @@ abstract class Remote {
     required int page,
   });
   Future<List<TimeModel>> getListTime({required GetHourParams params});
+  Future<List<BannerCarouselModel>> getListCarouselBanner();
   Future<HistoryTransactionModel> getdetailHistory({required int id});
   Future<bool> registeCheckEmail({required String email});
   Future<String> sendOTPCode({required String email});
@@ -972,10 +974,34 @@ class RemoteDataImpl implements Remote {
     );
 
     if (result is Map<String, dynamic>) {
-      Map<String, dynamic> res = result['user'];
+      Map<String, dynamic> res = result['customer'];
       return UserModel.fromJson(res);
     }
 
     throw Exception("Format data tidak sesuai");
+  }
+
+  @override
+  Future<List<BannerCarouselModel>> getListCarouselBanner() async {
+    await getLocal();
+
+    final result = await _handler.request(
+      endpoint: ApiConstant.getListCarouselBanner,
+      method: 'GET',
+      headers: {
+        // "Authorization": "Bearer $lclTkn",
+        "Accept": "application/json",
+        "X-API-TOKEN": "kasprima2025",
+      },
+    );
+
+    if (result is Map<String, dynamic>) {
+      final list = result['data'] as List;
+
+      return list
+          .map((e) => BannerCarouselModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+    throw Exception('Gagal Mengambil Banner');
   }
 }

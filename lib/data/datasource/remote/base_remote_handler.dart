@@ -3,16 +3,39 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kas_autocare_user/core/utils/navigation_service.dart';
 import 'package:kas_autocare_user/data/datasource/local/auth_local_data_source.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:sentry/sentry.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 class BaseRemoteHandler {
   final Dio dio;
 
-  BaseRemoteHandler(this.dio);
+  BaseRemoteHandler(this.dio) {
+    if (kDebugMode) {
+      // Hindari dobel interceptor kalau BaseRemoteHandler dibuat berkali-kali
+      final alreadyAdded = dio.interceptors.any(
+        (i) => i.runtimeType == PrettyDioLogger,
+      );
+
+      if (!alreadyAdded) {
+        dio.interceptors.add(
+          PrettyDioLogger(
+            requestHeader: true,
+            requestBody: true,
+            responseBody: true,
+            responseHeader: true,
+            error: true,
+            compact: true,
+            maxWidth: 90,
+          ),
+        );
+      }
+    }
+  }
 
   /// (GET / POST / PUT / DELETE)
   Future<dynamic> request({
@@ -26,11 +49,6 @@ class BaseRemoteHandler {
     try {
       // Default header
       final Map<String, dynamic> finalHeaders = {};
-
-      // // if (withAuth) {
-      // finalHeaders['Authorization'] =
-      //     'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2F1dG9jYXJlLWFwaS5rYXNwcmltYS5jby5pZC9hcGkvYXV0aC9sb2dpbiIsImlhdCI6MTc2NDI4ODcwMywiZXhwIjoxNzcwMjg4NjQzLCJuYmYiOjE3NjQyODg3MDMsImp0aSI6IjNpcVRWUVFybFI3ZExLck4iLCJzdWIiOiIzODQiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.0SUO5HDxl-u_5dqGpJesHRO4OfCp42hlu-F4pBhaaiA';
-      // // }
 
       if (headers != null && headers.isNotEmpty) {
         finalHeaders.addAll(headers);
