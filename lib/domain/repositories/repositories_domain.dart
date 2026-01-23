@@ -3,6 +3,7 @@ import 'package:kas_autocare_user/data/params/get_hour_params.dart';
 import 'package:kas_autocare_user/data/params/payload_address_input.dart';
 import 'package:kas_autocare_user/data/params/register_payload.dart';
 import 'package:kas_autocare_user/domain/entities/address_entity.dart';
+import 'package:kas_autocare_user/domain/entities/banner_carousel_entity/banner_carousel_entity.dart';
 import 'package:kas_autocare_user/domain/entities/district_entity.dart';
 import 'package:kas_autocare_user/domain/entities/history_transaction_entity.dart';
 import 'package:kas_autocare_user/domain/entities/time_entity.dart';
@@ -105,6 +106,7 @@ abstract class RepositoriesDomain {
   Future<Either<String, HistoryTransactionEntity>> getDetailHistory(int id);
   Future<Either<String, String>> deleteAddress(int id);
   Future<Either<String, AddressEntity>> detailAddress(int id);
+  Future<Either<String, List<BannerCarouselEntity>>> getListCarouselBanner();
   Future<Either<String, bool>> registerCheckEmail({required String email});
   Future<Either<String, String>> registerSendOtp({required String email});
   Future<Either<String, String>> registerVerifyOtp({

@@ -54,4 +54,6 @@ class ApiConstant {
   static const String updateAddress = '$address/update';
   static const String getListDistrict = '$region/district';
   static const String getListTime = '/schedule/available-slots';
+
+  static const String getListCarouselBanner = '/banners';
 }

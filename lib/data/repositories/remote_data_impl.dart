@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:kas_autocare_user/domain/entities/banner_carousel_entity/banner_carousel_entity.dart';
 
 import '../../domain/entities/address_entity.dart';
 import '../../domain/entities/authentification_entity.dart';
@@ -596,6 +597,20 @@ class RepositoriesImpl implements RepositoriesDomain {
       final res = result.toEntity();
 
       return Right(res);
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<String, List<BannerCarouselEntity>>>
+  getListCarouselBanner() async {
+    try {
+      final result = await remote.getListCarouselBanner();
+
+      final entities = result.map((model) => model.toEntity()).toList();
+
+      return Right(entities);
     } catch (e) {
       return Left(e.toString());
     }

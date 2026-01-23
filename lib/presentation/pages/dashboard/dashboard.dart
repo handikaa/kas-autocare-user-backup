@@ -8,6 +8,7 @@ import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 import '../../../core/config/assets/app_icons.dart';
 import '../../../core/config/inject/depedency_injection.dart';
 import '../../../core/config/theme/app_colors.dart';
+import '../../cubit/banner_carousel_cubit/get_list_banner_cubit.dart';
 import '../../cubit/list_history_cubit.dart';
 import '../history/history_page.dart';
 import '../home_page/home_page.dart';
@@ -37,8 +38,16 @@ class _DashboardState extends State<Dashboard> {
             });
           },
           children: [
-            BlocProvider(
-              create: (_) => sl<GetDetailUserCubit>()..fetchDetailUser(),
+            MultiBlocProvider(
+              providers: [
+                BlocProvider(
+                  create: (_) => sl<GetDetailUserCubit>()..fetchDetailUser(),
+                ),
+                BlocProvider(
+                  create: (_) => sl<GetListBannerCubit>()..execute(),
+                ),
+              ],
+
               child: HomePage(),
             ),
 

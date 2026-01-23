@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kas_autocare_user/core/config/theme/app_text_style.dart';
+import 'package:kas_autocare_user/domain/usecase/banner_carousel/get_list_banner_carousel_usecase.dart';
+import 'package:kas_autocare_user/presentation/cubit/banner_carousel_cubit/get_list_banner_cubit.dart';
 import 'package:kas_autocare_user/presentation/cubit/get_detail_user_cubit.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../core/config/assets/app_icons.dart' hide ImageFormater;
 import '../../../core/config/assets/app_images.dart';
@@ -24,7 +27,7 @@ class _HomePageState extends State<HomePage> {
       "icon": AppIcons.path('location'),
       'route': '/service',
     },
-    {"title": "Produk", "icon": AppIcons.path('location'), 'route': '/product'},
+    // {"title": "Produk", "icon": AppIcons.path('location'), 'route': '/product'},
     // {
     //   "title": "Tiket,Tagihan,\nPembayaran",
     //   "icon": AppIcons.path('location'),
@@ -35,6 +38,11 @@ class _HomePageState extends State<HomePage> {
   final List<String> banners = ["Banner 1", "Banner 2", "Banner 3"];
 
   int _currentIndex = 0;
+
+  Future<void> onRefresh() async {
+    context.read<GetDetailUserCubit>().fetchDetailUser();
+    context.read<GetListBannerCubit>().execute();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +55,7 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: AppColors.light.primary,
         color: AppColors.common.white,
         onRefresh: () {
-          return context.read<GetDetailUserCubit>().fetchDetailUser();
+          return onRefresh();
         },
         child: ListView(
           children: [
@@ -70,8 +78,8 @@ class _HomePageState extends State<HomePage> {
 
                     AppGap.height(38),
                     _menu(),
-                    AppGap.height(30),
-                    _topMerchant(),
+                    // AppGap.height(30),
+                    // _topMerchant(),
                   ],
                 ),
               ],
@@ -117,67 +125,208 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _bannerInformation() {
+    return BlocBuilder<GetListBannerCubit, GetListBannerState>(
+      builder: (context, state) {
+        if (state is GetListBannerLoading) {
+          return _shimmerCarouselLoading();
+        }
+        if (state is GetListBannerError) {
+          return _carouselError(message: state.message, onRetry: () {});
+        }
+
+        if (state is GetListBannerSuccess) {
+          var data = state.data;
+
+          return Column(
+            children: [
+              CarouselSlider(
+                options: CarouselOptions(
+                  height: 170,
+                  autoPlay: true,
+                  enlargeCenterPage: false,
+                  viewportFraction: 0.9,
+                  onPageChanged: (index, reason) {
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                  },
+                ),
+                items: data.map((banner) {
+                  return Builder(
+                    builder: (BuildContext context) {
+                      return Container(
+                        width: MediaQuery.of(context).size.width,
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 6.0,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 6,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
+                          image: DecorationImage(
+                            image: NetworkImage(banner.image),
+                            fit: BoxFit.cover,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      );
+                    },
+                  );
+                }).toList(),
+              ),
+              AppGap.height(10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(banners.length, (index) {
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    height: 8,
+                    width: _currentIndex == index ? 20 : 8,
+                    decoration: BoxDecoration(
+                      color: _currentIndex == index
+                          ? AppColors.light.primary
+                          : Colors.grey,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  );
+                }),
+              ),
+            ],
+          );
+        }
+
+        return SizedBox.shrink();
+      },
+    );
+  }
+
+  Widget _carouselError({
+    required String message,
+    required VoidCallback onRetry,
+  }) {
     return Column(
       children: [
-        CarouselSlider(
-          options: CarouselOptions(
-            height: 170,
-            autoPlay: true,
-            enlargeCenterPage: false,
-            viewportFraction: 0.9,
-            onPageChanged: (index, reason) {
-              setState(() {
-                _currentIndex = index;
-              });
-            },
+        Container(
+          height: 170,
+          width: double.infinity,
+          margin: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 6,
+                offset: Offset(0, 5),
+              ),
+            ],
           ),
-          items: banners.map((banner) {
-            return Builder(
-              builder: (BuildContext context) {
-                return Container(
-                  width: MediaQuery.of(context).size.width,
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 6.0,
-                    vertical: 10,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.wifi_off_rounded,
+                    size: 28,
+                    color: Colors.redAccent,
                   ),
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 6,
-                        offset: const Offset(0, 5),
+                  const SizedBox(height: 8),
+                  Text(
+                    message,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 13),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 36,
+                    child: ElevatedButton.icon(
+                      onPressed: onRetry,
+                      icon: const Icon(Icons.refresh, size: 18),
+                      label: const Text('Coba lagi'),
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
-                    ],
-                    image: DecorationImage(
-                      image: AssetImage(
-                        AppImages.path('baner', format: ImageFormater.jpg),
-                      ),
-                      fit: BoxFit.cover,
                     ),
-                    borderRadius: BorderRadius.circular(12),
                   ),
-                );
-              },
-            );
-          }).toList(),
+                ],
+              ),
+            ),
+          ),
         ),
-        AppGap.height(10),
+        const SizedBox(height: 10),
+
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(banners.length, (index) {
+          children: List.generate(3, (index) {
+            final isActive = index == 0;
             return AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               margin: const EdgeInsets.symmetric(horizontal: 4),
               height: 8,
-              width: _currentIndex == index ? 20 : 8,
+              width: isActive ? 20 : 8,
               decoration: BoxDecoration(
-                color: _currentIndex == index
-                    ? AppColors.light.primary
-                    : Colors.grey,
+                color: Colors.grey.shade400,
                 borderRadius: BorderRadius.circular(6),
               ),
             );
           }),
+        ),
+      ],
+    );
+  }
+
+  Widget _shimmerCarouselLoading() {
+    return Column(
+      children: [
+        Shimmer.fromColors(
+          baseColor: Colors.grey.shade300,
+          highlightColor: Colors.grey.shade100,
+          child: CarouselSlider(
+            options: CarouselOptions(
+              height: 170,
+              autoPlay: false,
+
+              enlargeCenterPage: false,
+              viewportFraction: 0.9,
+            ),
+            items: [
+              Builder(
+                builder: (context) {
+                  return Container(
+                    width: MediaQuery.of(context).size.width,
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 6.0,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 6,
+                          offset: Offset(0, 5),
+                        ),
+                      ],
+                      color: Colors.white, // penting: shimmer butuh color solid
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -281,27 +430,6 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
-                // Stack(
-                //   children: [
-                //     const CircleAvatar(
-                //       radius: 20,
-                //       backgroundColor: Colors.white,
-                //       child: Icon(Icons.notifications, color: Colors.teal),
-                //     ),
-                //     Positioned(
-                //       top: 6,
-                //       right: 6,
-                //       child: Container(
-                //         width: 10,
-                //         height: 10,
-                //         decoration: const BoxDecoration(
-                //           color: Colors.red,
-                //           shape: BoxShape.circle,
-                //         ),
-                //       ),
-                //     ),
-                //   ],
-                // ),
               ],
             );
           }
@@ -355,27 +483,6 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
-                // Stack(
-                //   children: [
-                //     const CircleAvatar(
-                //       radius: 20,
-                //       backgroundColor: Colors.white,
-                //       child: Icon(Icons.notifications, color: Colors.teal),
-                //     ),
-                //     Positioned(
-                //       top: 6,
-                //       right: 6,
-                //       child: Container(
-                //         width: 10,
-                //         height: 10,
-                //         decoration: const BoxDecoration(
-                //           color: Colors.red,
-                //           shape: BoxShape.circle,
-                //         ),
-                //       ),
-                //     ),
-                //   ],
-                // ),
               ],
             );
           }
