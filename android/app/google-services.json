@@ -1,0 +1,135 @@
+{
+  "project_info": {
+    "project_number": "323678300748",
+    "firebase_url": "https://bayu-firebase-e791e-default-rtdb.firebaseio.com",
+    "project_id": "bayu-firebase-e791e",
+    "storage_bucket": "bayu-firebase-e791e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:323678300748:android:b647aa1800f8407001a2e9",
+        "android_client_info": {
+          "package_name": "com.kas.kas_autocare_user.kas_autocare_user"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "323678300748-50i21vlq5adonbrn2rf4b78ll92jngj2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXD0fLBDP1yFMXlbuflYdmYAq-Wu8kNBc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "323678300748-50i21vlq5adonbrn2rf4b78ll92jngj2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "323678300748-4sjv6eccqiis7lcbk2opo9kqj12anch4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.kas.kasautocareuser.kasAutocareUser"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:323678300748:android:a8fc77fecd06fb3e01a2e9",
+        "android_client_info": {
+          "package_name": "com.klinautocare.klin_autocare"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "323678300748-50i21vlq5adonbrn2rf4b78ll92jngj2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXD0fLBDP1yFMXlbuflYdmYAq-Wu8kNBc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "323678300748-50i21vlq5adonbrn2rf4b78ll92jngj2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "323678300748-4sjv6eccqiis7lcbk2opo9kqj12anch4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.kas.kasautocareuser.kasAutocareUser"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:323678300748:android:1f1b4eb8ee1e232f01a2e9",
+        "android_client_info": {
+          "package_name": "com.penainsigth.penainsight"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "323678300748-avvprp71fuk5fukcsaecclb0i9pos4i0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.penainsigth.penainsight",
+            "certificate_hash": "394c770cd5eb60b53fc1653ab24cb1646f3544bc"
+          }
+        },
+        {
+          "client_id": "323678300748-g924ug5fp88qi1qpv9icchvuhmsuv38c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.penainsigth.penainsight",
+            "certificate_hash": "92f450eb7d4d41938b512385b56a3b9273cdc383"
+          }
+        },
+        {
+          "client_id": "323678300748-50i21vlq5adonbrn2rf4b78ll92jngj2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXD0fLBDP1yFMXlbuflYdmYAq-Wu8kNBc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "323678300748-50i21vlq5adonbrn2rf4b78ll92jngj2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "323678300748-4sjv6eccqiis7lcbk2opo9kqj12anch4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.kas.kasautocareuser.kasAutocareUser"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

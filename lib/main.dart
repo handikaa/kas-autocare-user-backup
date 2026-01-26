@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -99,6 +102,10 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('id_ID', null);
+
+  final fcmToken = await FirebaseMessaging.instance.getToken();
+
+  log(fcmToken ?? "+", name: "TOKEN FCM");
 
   await GeolocatorPlatform.instance.isLocationServiceEnabled();
   await init(ApiConstant.baseUrl);
