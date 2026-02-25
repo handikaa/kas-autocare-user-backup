@@ -11,6 +11,10 @@ class ApiConstant {
   static const String address = '/address';
   static const String region = '/region';
   static const String auth = '/auth';
+  static const String saveFcm = '/fcm/save-token';
+  static const String notif = '/list';
+  static const String readNotif = '/read/notification';
+  static const String sendNotif = '/notification/send-by-user';
 
   static const String detailUser = '$auth/detail';
 

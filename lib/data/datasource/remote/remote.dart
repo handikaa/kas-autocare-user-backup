@@ -1,6 +1,8 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
+import 'package:kas_autocare_user/data/model/history/history_model.dart';
+import 'package:kas_autocare_user/data/model/notification_model.dart';
 import 'package:kas_autocare_user/data/model/user_model.dart';
 import 'package:kas_autocare_user/data/params/history_params.dart';
 import 'package:kas_autocare_user/data/params/register_payload.dart';
@@ -13,7 +15,7 @@ import '../../model/brand_model.dart';
 import '../../model/chart_model.dart';
 import '../../model/city_model.dart';
 import '../../model/district_model.dart';
-import '../../model/history_transaction_model.dart';
+import '../../model/history/history_transaction_model.dart';
 import '../../model/menu_model.dart';
 import '../../model/merchant_model.dart';
 import '../../model/mvehicle_model.dart';
@@ -24,6 +26,7 @@ import '../../model/qr_product_model.dart';
 import '../../model/service_model.dart';
 import '../../model/shipping_model.dart';
 import '../../model/time_model.dart';
+import '../../model/transaction/transaction_model.dart';
 import '../../model/vehicle_model.dart';
 import '../../model/vehicle_payload_model.dart';
 import '../../params/add_tochart_params.dart';
@@ -62,11 +65,13 @@ abstract class Remote {
     required int bsnisId,
   });
   Future<List<CityModel>> getListCity();
-  Future<int> createBooking(BookingPayload payload);
+  Future<TransactionModel> createBooking(BookingPayload payload);
 
   Future<List<ProductModel>> getListProduct(ProductQueryParams params);
   Future<ProductModel> getdetailProduct(int productId);
   Future<AuthentificationModel> loginUser({required LoginParams payload});
+  Future<String> saveFcmToServer();
+
   Future<String> logoutUser();
   Future<String> addToChart(AddChartParams params);
   Future<List<ChartModel>> getListChart();
@@ -102,7 +107,7 @@ abstract class Remote {
   });
   Future<List<TimeModel>> getListTime({required GetHourParams params});
   Future<List<BannerCarouselModel>> getListCarouselBanner();
-  Future<HistoryTransactionModel> getdetailHistory({required int id});
+  Future<HistoryModel> getdetailHistory({required int id});
   Future<bool> registeCheckEmail({required String email});
   Future<String> sendOTPCode({required String email});
   Future<String> verifyOTPCode({required String email, required String code});
@@ -115,6 +120,15 @@ abstract class Remote {
     required String pass,
     required String confirmPass,
   });
+
+  Future<List<NotificationModel>> getListNotif();
+  Future<String> readNotif(List<int> notifId);
+  Future<String> sendNotif({
+    required String title,
+    required String body,
+    required String message,
+    required int userId,
+  });
 }
 
 class RemoteDataImpl implements Remote {
@@ -124,6 +138,7 @@ class RemoteDataImpl implements Remote {
   RemoteDataImpl(this.dio) : _handler = BaseRemoteHandler(dio);
 
   String? lclTkn;
+  String? fcmTkn;
   int? uid;
   int? csId;
 
@@ -131,9 +146,11 @@ class RemoteDataImpl implements Remote {
     final authLocal = AuthLocalDataSource();
 
     String? tkn = await authLocal.getToken();
+    String? tknFcm = await authLocal.getTokenFCM();
     int? lcluid = await authLocal.getUserId();
     int? lclCsid = await authLocal.getCustomerId();
     lclTkn = tkn;
+    fcmTkn = tknFcm;
     uid = lcluid;
     csId = lclCsid;
   }
@@ -352,7 +369,7 @@ class RemoteDataImpl implements Remote {
   }
 
   @override
-  Future<int> createBooking(BookingPayload payload) async {
+  Future<TransactionModel> createBooking(BookingPayload payload) async {
     // await getLocal();
 
     // final updatedPayload = payload.copyWith(id: userId);
@@ -368,9 +385,9 @@ class RemoteDataImpl implements Remote {
     );
 
     if (result is Map<String, dynamic>) {
-      final data = result['transaction']['id'] as int;
+      final data = result;
 
-      return data;
+      return TransactionModel.fromJson(data);
     }
 
     throw Exception('Gagal membuat booking (Format tidak sesuai)');
@@ -753,7 +770,7 @@ class RemoteDataImpl implements Remote {
   }
 
   @override
-  Future<HistoryTransactionModel> getdetailHistory({required int id}) async {
+  Future<HistoryModel> getdetailHistory({required int id}) async {
     await getLocal();
 
     final result = await _handler.request(
@@ -764,8 +781,8 @@ class RemoteDataImpl implements Remote {
     );
 
     if (result is Map<String, dynamic>) {
-      final res = result['transaction'];
-      return HistoryTransactionModel.fromJson(res);
+      final res = result;
+      return HistoryModel.fromJson(res);
     }
 
     throw Exception("Format data brand tidak sesuai");
@@ -1003,5 +1020,105 @@ class RemoteDataImpl implements Remote {
           .toList();
     }
     throw Exception('Gagal Mengambil Banner');
+  }
+
+  @override
+  Future<String> saveFcmToServer() async {
+    await getLocal();
+
+    final result = await _handler.request(
+      endpoint: ApiConstant.saveFcm,
+      method: 'POST',
+      data: {"user_id": uid, "fcm": fcmTkn},
+      headers: {
+        // "Authorization": "Bearer $lclTkn",
+        "Accept": "application/json",
+        "X-API-TOKEN": "kasprima2025",
+      },
+    );
+
+    if (result is Map<String, dynamic>) {
+      return result['message'] ?? "Berhasil menyimpan token";
+    }
+    throw Exception('Gagal notifikasi, hubungi developer untuk masalah detail');
+  }
+
+  @override
+  Future<List<NotificationModel>> getListNotif() async {
+    await getLocal();
+
+    final result = await _handler.request(
+      endpoint: ApiConstant.notif,
+      method: 'GET',
+      queryParameters: {"user_id": uid},
+      headers: {
+        // "Authorization": "Bearer $lclTkn",
+        "Accept": "application/json",
+        "X-API-TOKEN": "kasprima2025",
+      },
+    );
+
+    if (result is List) {
+      return result
+          .map((e) => NotificationModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+    throw Exception('Gagal notifikasi, hubungi developer untuk masalah detail');
+  }
+
+  @override
+  Future<String> readNotif(List<int> notifId) async {
+    await getLocal();
+
+    final result = await _handler.request(
+      endpoint: ApiConstant.readNotif,
+      method: 'POST',
+      data: {"notification_id": notifId, "user_id": uid},
+      headers: {
+        // "Authorization": "Bearer $lclTkn",
+        "Accept": "application/json",
+        "X-API-TOKEN": "kasprima2025",
+      },
+    );
+
+    if (result is Map<String, dynamic>) {
+      return result['message'];
+    }
+    throw Exception(
+      'Terjadi Kesalahan, hubungi developer untuk masalah detail',
+    );
+  }
+
+  @override
+  Future<String> sendNotif({
+    required String title,
+    required String body,
+    required String message,
+    required int userId,
+  }) async {
+    await getLocal();
+
+    final result = await _handler.request(
+      endpoint: ApiConstant.sendNotif,
+      method: 'POST',
+      data: {
+        "title": title,
+        "body": body,
+        "message": message,
+        "user_id": userId,
+      },
+      headers: {
+        // "Authorization": "Bearer $lclTkn",
+        "Accept": "application/json",
+        "X-API-TOKEN": "kasprima2025",
+      },
+    );
+
+    if (result is Map<String, dynamic>) {
+      return result['message'];
+    }
+    throw Exception(
+      'Terjadi Kesalahan, hubungi developer untuk masalah detail',
+    );
   }
 }

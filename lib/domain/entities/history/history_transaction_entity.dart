@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import 'service_entity.dart';
+import '../service_entity.dart';
 
 class HistoryTransactionEntity extends Equatable {
   final int id;
@@ -38,8 +38,6 @@ class HistoryTransactionEntity extends Equatable {
 
   // final MasterMemberEntity masterMember;
   const HistoryTransactionEntity({
-    required this.shippingOrder,
-    required this.branch,
     required this.id,
     required this.userId,
     required this.branchId,
@@ -69,6 +67,8 @@ class HistoryTransactionEntity extends Equatable {
     required this.customerId,
     required this.date,
     required this.transactionItems,
+    required this.shippingOrder,
+    required this.branch,
     required this.payment,
     // required this.masterMember,
   });
@@ -104,9 +104,9 @@ class HistoryTransactionEntity extends Equatable {
     customerId,
     date,
     transactionItems,
-    payment,
+    // payment,
+    // branch,
     // masterMember,
-    branch,
   ];
 }
 

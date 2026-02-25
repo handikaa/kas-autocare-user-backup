@@ -3,15 +3,14 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:kas_autocare_user/core/utils/app_snackbar.dart';
 
 import '../../../core/config/theme/app_colors.dart';
 import '../../../core/config/theme/app_text_style.dart';
+import '../../../core/utils/app_snackbar.dart';
 import '../../../data/params/add_tochart_params.dart';
 import '../../../domain/entities/chart_entity.dart';
 import '../../../domain/entities/product_entity.dart';
 import '../../cubit/add_tochart_cubit.dart';
-import '../../cubit/cart_cubit.dart';
 import '../widget.dart';
 
 class AddToCartSheet extends StatefulWidget {

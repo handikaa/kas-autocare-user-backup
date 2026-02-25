@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:kas_autocare_user/domain/usecase/add_address.dart';
 import 'package:kas_autocare_user/domain/usecase/add_to_chart.dart';
+import 'package:kas_autocare_user/domain/usecase/authentification/save_fcm_usecase.dart';
 import 'package:kas_autocare_user/domain/usecase/checkout_product.dart';
 import 'package:kas_autocare_user/domain/usecase/create_booking_customer.dart';
 import 'package:kas_autocare_user/domain/usecase/forgot_send_otp.dart';
@@ -24,6 +25,7 @@ import 'package:kas_autocare_user/domain/usecase/generate_qr_product.dart';
 import 'package:kas_autocare_user/domain/usecase/generate_qr_service.dart';
 import 'package:kas_autocare_user/domain/usecase/get_list_district.dart';
 import 'package:kas_autocare_user/domain/usecase/login_user.dart';
+import 'package:kas_autocare_user/domain/usecase/notification/send_notification_usecase.dart';
 import 'package:kas_autocare_user/domain/usecase/regist_check_email.dart';
 import 'package:kas_autocare_user/domain/usecase/register_user.dart';
 import 'package:kas_autocare_user/domain/usecase/reset_pass.dart';
@@ -47,6 +49,8 @@ import 'package:kas_autocare_user/presentation/cubit/list_time_cubit.dart';
 import 'package:kas_autocare_user/presentation/cubit/logout_cubit.dart';
 import 'package:kas_autocare_user/presentation/cubit/merchant_nearby_cubit.dart';
 import 'package:kas_autocare_user/presentation/cubit/model_cubit.dart';
+import 'package:kas_autocare_user/presentation/cubit/notification/save_fcm_cubit.dart';
+import 'package:kas_autocare_user/presentation/cubit/notification/send_notification_cubit.dart';
 import 'package:kas_autocare_user/presentation/cubit/package_cubit.dart';
 import 'package:kas_autocare_user/presentation/cubit/product_cubit.dart';
 import 'package:kas_autocare_user/presentation/cubit/register_cubit.dart';
@@ -56,6 +60,7 @@ import 'package:kas_autocare_user/presentation/cubit/verify_otp_cubit.dart';
 
 import '../../../data/datasource/remote/remote.dart';
 import '../../../data/repositories/remote_data_impl.dart';
+import '../../../data/repositories/ws_auth_repository.dart';
 import '../../../domain/repositories/repositories_domain.dart';
 import '../../../domain/usecase/banner_carousel/get_list_banner_carousel_usecase.dart';
 import '../../../domain/usecase/create_vehicle_customer.dart';
@@ -66,22 +71,38 @@ import '../../../domain/usecase/fetch_list_menu.dart';
 import '../../../domain/usecase/fetch_list_merchant_nearby.dart';
 import '../../../domain/usecase/fetch_list_vehicle_cust.dart';
 import '../../../domain/usecase/get_list_chart.dart';
+import '../../../domain/usecase/notification/get_list_notification_usecase.dart';
+import '../../../domain/usecase/notification/read_list_notification_usecase.dart';
 import '../../../domain/usecase/update_chart.dart';
 import '../../../presentation/cubit/banner_carousel_cubit/get_list_banner_cubit.dart';
 import '../../../presentation/cubit/brand_cubit.dart';
 import '../../../presentation/cubit/generate_qr_cubit.dart';
 import '../../../presentation/cubit/login_cubit.dart';
+import '../../../presentation/cubit/notification/get_list_notification_cubit.dart';
+import '../../../presentation/cubit/notification/read_list_notification_cubit.dart';
+import '../../../presentation/cubit/payment_ws/payment_ws_cubit.dart';
 import '../../../presentation/cubit/service_cubit.dart';
 import '../../network/dio_client.dart';
+import '../utils/payment_service_websocket.dart';
 
 final sl = GetIt.instance;
 
 Future<void> init(String baseUrl) async {
-  // Base DioClient
+  // DioClient (singleton)
   sl.registerLazySingleton(() => DioClient(baseUrl));
 
-  // Dio instance dari DioClient
+  // Dio instance (singleton)
   sl.registerLazySingleton<Dio>(() => sl<DioClient>().dio);
+
+  // WS auth repo
+  sl.registerLazySingleton<WsAuthRepository>(
+    () => WsAuthRepositoryImpl(dio: sl<Dio>()),
+  );
+
+  // WS service
+  sl.registerLazySingleton<PaymentWsService>(
+    () => PaymentWsService(authRepo: sl<WsAuthRepository>(), enableLogs: true),
+  );
 
   // Data source
   sl.registerLazySingleton<Remote>(() => RemoteDataImpl(sl()));
@@ -130,9 +151,14 @@ Future<void> init(String baseUrl) async {
   sl.registerLazySingleton(() => ResetPass(sl()));
   sl.registerLazySingleton(() => GetDetailUser(sl()));
   sl.registerLazySingleton(() => GetListBannerCarouselUsecase(sl()));
+  sl.registerLazySingleton(() => Savefcmusecase(sl()));
+  sl.registerLazySingleton(() => GetListNotificationUsecase(sl()));
+  sl.registerLazySingleton(() => ReadListNotificationUsecase(sl()));
+  sl.registerLazySingleton(() => SendNotificationUsecase(sl()));
 
   // Cubit
   sl.registerFactory(() => GetDetailUserCubit(sl<GetDetailUser>()));
+  sl.registerFactory(() => SaveFcmCubit(sl<Savefcmusecase>()));
   sl.registerFactory(() => BrandCubit(sl<FetchListBrand>()));
   sl.registerFactory(() => ModelCubit(sl<FetchListVmodel>()));
   sl.registerFactory(() => VehicleCustCubit(sl<FetchListVehicleCust>()));
@@ -153,6 +179,9 @@ Future<void> init(String baseUrl) async {
   sl.registerFactory(() => CheckoutCubit(sl<CheckoutProduct>()));
   sl.registerFactory(() => ListHistoryCubit(sl<FetchListHistory>()));
   sl.registerFactory(() => ListTimeCubit(sl<FetchListTime>()));
+  sl.registerFactory(
+    () => SendNotificationCubit(sl<SendNotificationUsecase>()),
+  );
   sl.registerFactory(
     () => GetListBannerCubit(sl<GetListBannerCarouselUsecase>()),
   );
@@ -176,11 +205,18 @@ Future<void> init(String baseUrl) async {
   );
   sl.registerFactory(() => ListDistrictCubit(sl<GetListDistrict>()));
   sl.registerFactory(
+    () => GetListNotificationCubit(sl<GetListNotificationUsecase>()),
+  );
+  sl.registerFactory(
+    () => ReadListNotificationCubit(sl<ReadListNotificationUsecase>()),
+  );
+  sl.registerFactory(
     () => ListAddressCubit(sl<FetchListAddress>(), sl<DeleteAddress>()),
   );
   sl.registerFactory(
     () => GenerateQrCubit(sl<GenerateQrProduct>(), sl<GenerateQrService>()),
   );
+  sl.registerFactory(() => PaymentWsCubit(sl<PaymentWsService>()));
   sl.registerFactory(
     () => CartCubit(
       getListChart: sl<GetListChart>(),

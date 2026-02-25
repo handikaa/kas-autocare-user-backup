@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kas_autocare_user/core/config/theme/app_text_style.dart';
-import 'package:kas_autocare_user/domain/entities/history_transaction_entity.dart';
+import 'package:kas_autocare_user/domain/entities/history/history_transaction_entity.dart';
 import 'package:kas_autocare_user/presentation/cubit/detail_history_cubit.dart';
 import 'package:kas_autocare_user/presentation/widget/widget.dart';
 import 'package:universal_stepper/universal_stepper.dart';
@@ -70,7 +70,9 @@ class _TrackingProductPageState extends State<TrackingProductPage> {
               BlocBuilder<DetailHistoryCubit, DetailHistoryState>(
                 builder: (context, state) {
                   if (state is DetailHistoryLoaded) {
-                    return _buildAddressCustomer(state.data);
+                    HistoryTransactionEntity historyTransaction =
+                        state.data.historyTransactionEntity;
+                    return _buildAddressCustomer(historyTransaction);
                   }
                   return SizedBox.shrink();
                 },

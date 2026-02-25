@@ -10,7 +10,7 @@ import 'package:kas_autocare_user/data/params/history_params.dart';
 
 import '../../../core/config/theme/app_colors.dart';
 import '../../../core/config/theme/app_text_style.dart';
-import '../../../domain/entities/history_transaction_entity.dart';
+import '../../../domain/entities/history/history_transaction_entity.dart';
 import '../../cubit/list_history_cubit.dart';
 import '../../widget/bottomsheet/filter_history_sheet.dart';
 import '../../widget/icon/app_circular_loading.dart';

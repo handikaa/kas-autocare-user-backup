@@ -176,7 +176,7 @@ class _StepTwoWidgetState extends State<StepTwoWidget> {
                               : null,
                           child: MerchantCard(
                             text: merchant.storeName,
-                            type: merchant.merchantType,
+                            type: merchant.address,
                             rating: 0.0,
                             closeMessage: closeMessage,
                             isOpen: isOpen,

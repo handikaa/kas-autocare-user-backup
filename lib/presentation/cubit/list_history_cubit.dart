@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kas_autocare_user/domain/entities/history_transaction_entity.dart';
+import 'package:kas_autocare_user/domain/entities/history/history_transaction_entity.dart';
 
 import '../../data/params/history_params.dart';
 import '../../domain/usecase/fetch_list_history.dart';

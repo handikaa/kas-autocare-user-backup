@@ -4,6 +4,7 @@ import 'package:easy_stepper/easy_stepper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kas_autocare_user/domain/entities/transaction/users_login_e.dart';
 
 import '../../../core/config/theme/app_colors.dart';
 import '../../../core/config/theme/app_text_style.dart';
@@ -14,6 +15,7 @@ import '../../../data/params/booking_payload.dart';
 import '../../../domain/entities/merchant_entity.dart';
 import '../../../domain/entities/package_entity.dart';
 import '../../../domain/entities/service_entity.dart';
+import '../../../domain/entities/transaction/transaction_e.dart';
 import '../../cubit/create_booking_cubit.dart';
 import '../../widget/bottomsheet/wording_bottomsheet.dart';
 import '../../widget/button/app_elevated_button.dart';
@@ -215,6 +217,9 @@ class _ServicePageState extends State<ServicePage> {
         if (state is CreateBookingLoading) {
           AppDialog.loading(context, message: "Membuat booking...");
         } else if (state is CreateBookingSuccess) {
+          TransactionE transactionE = state.data.transaction;
+          UsersLoginE userLoginE = state.data.usersLogin;
+
           Navigator.pop(context);
           showAppSnackBar(
             context,
@@ -223,8 +228,12 @@ class _ServicePageState extends State<ServicePage> {
           );
 
           PaymentData dataPayment = PaymentData(
-            id: state.data,
+            id: transactionE.id,
             type: 'service',
+            code: transactionE.code,
+            userId: userLoginE.userId,
+            plate: transactionE.licensePlate,
+
             subMerchant: selectedMerchant?.subMerchant.idMerchant ?? 0,
           );
           context.go('/payment-information', extra: dataPayment);

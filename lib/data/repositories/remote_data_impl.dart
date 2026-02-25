@@ -1,22 +1,25 @@
 import 'package:dartz/dartz.dart';
-import 'package:kas_autocare_user/domain/entities/banner_carousel_entity/banner_carousel_entity.dart';
+import 'package:kas_autocare_user/domain/entities/history/history_entity.dart';
 
 import '../../domain/entities/address_entity.dart';
 import '../../domain/entities/authentification_entity.dart';
+import '../../domain/entities/banner_carousel_entity/banner_carousel_entity.dart';
 import '../../domain/entities/brand_entity.dart';
 import '../../domain/entities/chart_entity.dart';
 import '../../domain/entities/city_entity.dart';
 import '../../domain/entities/district_entity.dart';
-import '../../domain/entities/history_transaction_entity.dart';
+import '../../domain/entities/history/history_transaction_entity.dart';
 import '../../domain/entities/menu_entity.dart';
 import '../../domain/entities/merchant_entity.dart';
 import '../../domain/entities/mvehicle_entity.dart';
+import '../../domain/entities/notification/notification_entity.dart';
 import '../../domain/entities/package_entity.dart';
 import '../../domain/entities/product_entity.dart';
 import '../../domain/entities/qr_product_entity.dart';
 import '../../domain/entities/service_entity.dart';
 import '../../domain/entities/shipping_entity.dart';
 import '../../domain/entities/time_entity.dart';
+import '../../domain/entities/transaction/transaction_entity.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/entities/vehicle_entity.dart';
 import '../../domain/repositories/repositories_domain.dart';
@@ -182,11 +185,13 @@ class RepositoriesImpl implements RepositoriesDomain {
   }
 
   @override
-  Future<Either<String, int>> createBooking(BookingPayload payload) async {
+  Future<Either<String, TransactionEntity>> createBooking(
+    BookingPayload payload,
+  ) async {
     try {
       final result = await remote.createBooking(payload);
 
-      final entities = result;
+      final entities = result.toEntity();
 
       return Right(entities);
     } catch (e) {
@@ -439,9 +444,7 @@ class RepositoriesImpl implements RepositoriesDomain {
   }
 
   @override
-  Future<Either<String, HistoryTransactionEntity>> getDetailHistory(
-    int id,
-  ) async {
+  Future<Either<String, HistoryEntity>> getDetailHistory(int id) async {
     try {
       final result = await remote.getdetailHistory(id: id);
 
@@ -611,6 +614,64 @@ class RepositoriesImpl implements RepositoriesDomain {
       final entities = result.map((model) => model.toEntity()).toList();
 
       return Right(entities);
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<String, String>> saveFcmToServer() async {
+    try {
+      final result = await remote.saveFcmToServer();
+
+      final entities = result;
+
+      return Right(entities);
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<String, List<NotificationEntity>>> getListNotif() async {
+    try {
+      final result = await remote.getListNotif();
+
+      final entities = result.map((model) => model.toEntity()).toList();
+
+      return Right(entities);
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<String, String>> readListNotif(List<int> notifId) async {
+    try {
+      final result = await remote.readNotif(notifId);
+
+      return Right(result);
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<String, String>> sendNotif({
+    required String title,
+    required String body,
+    required String message,
+    required int userId,
+  }) async {
+    try {
+      final result = await remote.sendNotif(
+        body: body,
+        message: message,
+        title: title,
+        userId: userId,
+      );
+
+      return Right(result);
     } catch (e) {
       return Left(e.toString());
     }

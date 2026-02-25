@@ -12,7 +12,7 @@ class CreateBookingInitial extends CreateBookingState {}
 class CreateBookingLoading extends CreateBookingState {}
 
 class CreateBookingSuccess extends CreateBookingState {
-  final int data;
+  final TransactionEntity data;
 
   const CreateBookingSuccess(this.data);
 

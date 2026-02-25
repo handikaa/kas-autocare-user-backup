@@ -16,9 +16,11 @@ import '../../../core/config/theme/app_text_style.dart';
 import '../../../core/utils/app_snackbar.dart';
 import '../../../core/utils/share_method.dart';
 import '../../../data/params/winpay_response_convert.dart';
-import '../../../domain/entities/history_transaction_entity.dart';
+import '../../../domain/entities/history/history_transaction_entity.dart';
 import '../../../domain/entities/service_entity.dart';
+import '../../../domain/entities/transaction/users_login_e.dart';
 import '../../cubit/detail_history_cubit.dart';
+import '../../cubit/notification/send_notification_cubit.dart';
 import '../../widget/icon/app_circular_loading.dart';
 import '../../widget/widget.dart';
 
@@ -36,81 +38,90 @@ class _DetailBookingTransactionPageState
   bool isLoading = false;
   WinpayResponse? parsedData;
 
+  void generateQr() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+      context.read<GenerateQrCubit>().getGenerateQrServiceCubit(
+        id: widget.data.subMerchant,
+        idMerchant: widget.data.subMerchant,
+      );
+    } catch (e) {
+      print(e);
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> saveQrGallery(
+    WinpayResponse parsedData, {
+    required void Function(void Function()) dialogSetState,
+  }) async {
+    if (parsedData.qrUrl == null) {
+      showAppSnackBar(
+        context,
+        message: "QR belum siap diunduh",
+        type: SnackType.error,
+      );
+      return;
+    }
+
+    // 🔥 update loading di dialog
+    dialogSetState(() => isLoading = true);
+
+    try {
+      final dio = Dio();
+      final response = await dio.get<List<int>>(
+        parsedData.qrUrl!,
+        options: Options(responseType: ResponseType.bytes),
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final bytes = Uint8List.fromList(response.data!);
+        final fileName = "qris_${DateTime.now().millisecondsSinceEpoch}.jpg";
+
+        final result = await SaverGallery.saveImage(
+          bytes,
+          fileName: fileName,
+          skipIfExists: false,
+        );
+
+        if (!result.isSuccess) {
+          showAppSnackBar(
+            context,
+            message: "Gagal menyimpan QR ke galeri",
+            type: SnackType.error,
+          );
+        } else {
+          showAppSnackBar(
+            context,
+            message: "Berhasil mendownload QRIS, lihat di galeri Anda",
+            type: SnackType.success,
+          );
+        }
+      }
+    } catch (e) {
+      showAppSnackBar(context, message: e.toString(), type: SnackType.error);
+    } finally {
+      dialogSetState(() => isLoading = false); // 🔥 tutup loading
+    }
+  }
+
+  void _sendNotifFcm({required String plate, required int userId}) {
+    context.read<SendNotificationCubit>().sendNotification(
+      title: "Booking Baru $plate",
+      body: "Segera Konfirmasi Transaksi",
+      message: "Segera Konfirmasi Transaksi",
+      userId: userId,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     double maxH = MediaQuery.of(context).size.height;
-
-    void generateQr() async {
-      try {
-        setState(() {
-          isLoading = true;
-        });
-        context.read<GenerateQrCubit>().getGenerateQrServiceCubit(
-          id: widget.data.subMerchant,
-          idMerchant: widget.data.subMerchant,
-        );
-      } catch (e) {
-        print(e);
-      } finally {
-        setState(() {
-          isLoading = false;
-        });
-      }
-    }
-
-    Future<void> saveQrGallery(
-      WinpayResponse parsedData, {
-      required void Function(void Function()) dialogSetState,
-    }) async {
-      if (parsedData.qrUrl == null) {
-        showAppSnackBar(
-          context,
-          message: "QR belum siap diunduh",
-          type: SnackType.error,
-        );
-        return;
-      }
-
-      // 🔥 update loading di dialog
-      dialogSetState(() => isLoading = true);
-
-      try {
-        final dio = Dio();
-        final response = await dio.get<List<int>>(
-          parsedData.qrUrl!,
-          options: Options(responseType: ResponseType.bytes),
-        );
-
-        if (response.statusCode == 200 && response.data != null) {
-          final bytes = Uint8List.fromList(response.data!);
-          final fileName = "qris_${DateTime.now().millisecondsSinceEpoch}.jpg";
-
-          final result = await SaverGallery.saveImage(
-            bytes,
-            fileName: fileName,
-            skipIfExists: false,
-          );
-
-          if (!result.isSuccess) {
-            showAppSnackBar(
-              context,
-              message: "Gagal menyimpan QR ke galeri",
-              type: SnackType.error,
-            );
-          } else {
-            showAppSnackBar(
-              context,
-              message: "Berhasil mendownload QRIS, lihat di galeri Anda",
-              type: SnackType.success,
-            );
-          }
-        }
-      } catch (e) {
-        showAppSnackBar(context, message: e.toString(), type: SnackType.error);
-      } finally {
-        dialogSetState(() => isLoading = false); // 🔥 tutup loading
-      }
-    }
 
     void showPaymentCodeDialog(BuildContext context, WinpayResponse data) {
       showDialog(
@@ -182,7 +193,9 @@ class _DetailBookingTransactionPageState
             BlocBuilder<DetailHistoryCubit, DetailHistoryState>(
               builder: (context, state) {
                 if (state is DetailHistoryLoaded) {
-                  if (state.data.status == 'pending') {
+                  HistoryTransactionEntity historyTransaction =
+                      state.data.historyTransactionEntity;
+                  if (historyTransaction.status == 'pending') {
                     return Container(
                       color: AppColors.light.background,
                       child: SafeArea(
@@ -239,6 +252,9 @@ class _DetailBookingTransactionPageState
                       ),
                     );
                   }
+                  if (historyTransaction.status == 'process_payment') {
+                    return _buildBottomButtonProcessPayment();
+                  }
                 }
                 return SizedBox.shrink();
               },
@@ -285,28 +301,39 @@ class _DetailBookingTransactionPageState
 
               if (state is DetailHistoryLoaded) {
                 final data = state.data;
+                HistoryTransactionEntity historyTransaction =
+                    data.historyTransactionEntity;
+                UsersLoginE users = data.usersLogin;
 
                 // List<TransactionItemEntity> trxItem = data.transactionItems;
                 // PackageEntity package =
-                if (data.payment.data != "") {
-                  final rawDataString = data.payment.data;
+                if (historyTransaction.payment.data != "") {
+                  final rawDataString = historyTransaction.payment.data;
 
                   parsedData = WinpayResponse.fromRawJson(rawDataString);
                 }
 
-                final TransactionItemEntity? package = data.transactionItems
+                if (historyTransaction.status == 'payment_success') {
+                  _sendNotifFcm(
+                    plate: historyTransaction.licensePlate,
+                    userId: users.userId,
+                  );
+                }
+
+                final TransactionItemEntity? package = historyTransaction
+                    .transactionItems
                     .where((e) => e.itemType == 'package')
                     .firstOrNull;
 
                 final List<ServiceEntity>? services =
-                    data.transactionItems.isNotEmpty
-                    ? data.transactionItems
+                    historyTransaction.transactionItems.isNotEmpty
+                    ? historyTransaction.transactionItems
                           .where((e) => e.itemType == 'service')
                           .map((e) => e.serviceEntity)
                           .toList()
                     : null;
 
-                bool isKasPlusSelected = data.isKasPlus == 1;
+                bool isKasPlusSelected = historyTransaction.isKasPlus == 1;
 
                 PackageEntity packageEntity = PackageEntity(
                   id: 0,
@@ -343,16 +370,16 @@ class _DetailBookingTransactionPageState
                     children: [
                       AppGap.height(12),
                       Image(image: AssetImage(AppImages.logoTeks), width: 140),
-                      _buildStatusIcon(data.status),
+                      _buildStatusIcon(historyTransaction.status),
                       AppGap.height(12),
                       AppText(
                         maxLines: 3,
-                        ShareMethod.getStatusDetail(data.status),
+                        ShareMethod.getStatusDetail(historyTransaction.status),
                         variant: TextVariant.body2,
                         weight: TextWeight.semiBold,
                       ),
                       AppGap.height(8),
-                      if (data.status == 'payment_success') ...[
+                      if (historyTransaction.status == 'payment_success') ...[
                         AppText(
                           maxLines: 3,
                           'Menunggu Konfirmasi Carwash',
@@ -362,12 +389,14 @@ class _DetailBookingTransactionPageState
                       ],
                       AppGap.height(8),
                       AppText(
-                        DateTimeFormatter.formatDateTime(data.createdAt),
+                        DateTimeFormatter.formatDateTime(
+                          historyTransaction.createdAt,
+                        ),
                         variant: TextVariant.body3,
                         weight: TextWeight.medium,
                       ),
-                      if (data.status == 'process_payment') ...[
-                        if (data.payment.data != "") ...[
+                      if (historyTransaction.status == 'process_payment') ...[
+                        if (historyTransaction.payment.data != "") ...[
                           AppGap.height(12),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 70),
@@ -399,15 +428,23 @@ class _DetailBookingTransactionPageState
                           1: FlexColumnWidth(2),
                         },
                         children: [
-                          buildTableRow('Nama Pemilik', data.ownerName),
-                          buildTableRow('Flat Nomor', data.licensePlate),
+                          buildTableRow(
+                            'Nama Pemilik',
+                            historyTransaction.ownerName,
+                          ),
+                          buildTableRow(
+                            'Flat Nomor',
+                            historyTransaction.licensePlate,
+                          ),
                           buildTableRow(
                             'Tipe Kendaraan',
-                            ShareMethod.getStatusVehicleType(data.vehicleType),
+                            ShareMethod.getStatusVehicleType(
+                              historyTransaction.vehicleType,
+                            ),
                           ),
-                          buildTableRow('Brand', data.brand),
-                          buildTableRow('Model', data.model),
-                          buildTableRow('Warna', data.color),
+                          buildTableRow('Brand', historyTransaction.brand),
+                          buildTableRow('Model', historyTransaction.model),
+                          buildTableRow('Warna', historyTransaction.color),
                         ],
                       ),
                       AppGap.height(12),
@@ -436,14 +473,17 @@ class _DetailBookingTransactionPageState
                         children: [
                           buildTableRow(
                             'Jadwal Booking',
-                            "${DateTimeFormatter.formatDateOnly(data.scheduleDate)}, ${data.scheduleTime}",
+                            "${DateTimeFormatter.formatDateOnly(historyTransaction.scheduleDate)}, ${historyTransaction.scheduleTime}",
                           ),
-                          if (data.isKasPlus == 1)
+                          if (historyTransaction.isKasPlus == 1)
                             buildTableRow('Prioritas', 'KAS PLUS Prioritas'),
-                          buildTableRow('Carwash', data.branch.storeName),
+                          buildTableRow(
+                            'Carwash',
+                            historyTransaction.branch.storeName,
+                          ),
                           buildTableRow(
                             'Lokasi Carwash',
-                            "${data.branch.address} ${data.branch.district} ${data.branch.city}",
+                            "${historyTransaction.branch.address} ${historyTransaction.branch.district} ${historyTransaction.branch.city}",
                           ),
                         ],
                       ),
@@ -463,7 +503,7 @@ class _DetailBookingTransactionPageState
                         layananTambahan: services ?? [],
                         totalPembayaran: _calculateTotal(
                           basePrice: package?.packageVariantNew.price ?? 0,
-                          data: data,
+                          data: historyTransaction,
                           isKasPlusSelected: isKasPlusSelected,
                         ),
                         isKasPlusSelected: isKasPlusSelected,
@@ -495,6 +535,56 @@ class _DetailBookingTransactionPageState
             },
           ),
         ],
+      ),
+    );
+  }
+
+  Container _buildBottomButtonProcessPayment() {
+    return Container(
+      color: AppColors.light.background,
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(15),
+          child: BlocConsumer<GenerateQrCubit, GenerateQrState>(
+            listenWhen: (prev, curr) =>
+                curr is GenerateQrStateSuccess || curr is GenerateQrStateError,
+            listener: (context, state) {
+              if (state is GenerateQrStateSuccess) {
+                context.read<DetailHistoryCubit>().getDetailHistory(
+                  widget.data.id,
+                );
+              }
+
+              if (state is GenerateQrStateError) {
+                showAppSnackBar(
+                  context,
+                  message: state.message,
+                  type: SnackType.error,
+                );
+              }
+            },
+            builder: (context, state) {
+              final bool isLoading = state is GenerateQrStateLoading;
+
+              return Row(
+                children: [
+                  Expanded(
+                    child: AppElevatedButton(
+                      text: isLoading ? "Loading..." : "Cek Status Bayar",
+                      onPressed: isLoading
+                          ? null
+                          : () {
+                              context
+                                  .read<DetailHistoryCubit>()
+                                  .getDetailHistory(widget.data.id);
+                            },
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
       ),
     );
   }

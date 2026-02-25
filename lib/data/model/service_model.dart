@@ -53,6 +53,17 @@ class ServiceModel extends Equatable {
     category: category ?? '',
   );
 
+  const ServiceModel.empty()
+    : id = 0,
+      name = '',
+      vehicleType = '',
+      isWashingType = 0,
+      estimatedTime = 0,
+      branchId = 0,
+      bussinesId = 0,
+      price = 0,
+      category = '';
+
   @override
   List<Object?> get props => [
     id,

@@ -5,7 +5,7 @@ import 'package:kas_autocare_user/data/params/register_payload.dart';
 import 'package:kas_autocare_user/domain/entities/address_entity.dart';
 import 'package:kas_autocare_user/domain/entities/banner_carousel_entity/banner_carousel_entity.dart';
 import 'package:kas_autocare_user/domain/entities/district_entity.dart';
-import 'package:kas_autocare_user/domain/entities/history_transaction_entity.dart';
+import 'package:kas_autocare_user/domain/entities/history/history_transaction_entity.dart';
 import 'package:kas_autocare_user/domain/entities/time_entity.dart';
 import 'package:kas_autocare_user/domain/entities/user_entity.dart';
 
@@ -23,14 +23,17 @@ import '../entities/authentification_entity.dart';
 import '../entities/brand_entity.dart';
 import '../entities/chart_entity.dart';
 import '../entities/city_entity.dart';
+import '../entities/history/history_entity.dart';
 import '../entities/menu_entity.dart';
 import '../entities/merchant_entity.dart';
 import '../entities/mvehicle_entity.dart';
+import '../entities/notification/notification_entity.dart';
 import '../entities/package_entity.dart';
 import '../entities/product_entity.dart';
 import '../entities/qr_product_entity.dart';
 import '../entities/service_entity.dart';
 import '../entities/shipping_entity.dart';
+import '../entities/transaction/transaction_entity.dart';
 import '../entities/vehicle_entity.dart';
 
 abstract class RepositoriesDomain {
@@ -61,7 +64,9 @@ abstract class RepositoriesDomain {
     required int bsnisId,
   });
   Future<Either<String, List<CityEntity>>> getlistCity();
-  Future<Either<String, int>> createBooking(BookingPayload payload);
+  Future<Either<String, TransactionEntity>> createBooking(
+    BookingPayload payload,
+  );
 
   Future<Either<String, List<ProductEntity>>> getListProduct(
     ProductQueryParams params,
@@ -89,6 +94,7 @@ abstract class RepositoriesDomain {
 
   Future<Either<String, String>> addAddress(PayloadAddressInput payload);
   Future<Either<String, AuthentificationEntity>> loginUser(LoginParams payload);
+  Future<Either<String, String>> saveFcmToServer();
   Future<Either<String, String>> logoutUser();
   Future<Either<String, String>> updateAddress({
     required int id,
@@ -103,7 +109,7 @@ abstract class RepositoriesDomain {
   Future<Either<String, List<TimeEntity>>> getListTime({
     required GetHourParams params,
   });
-  Future<Either<String, HistoryTransactionEntity>> getDetailHistory(int id);
+  Future<Either<String, HistoryEntity>> getDetailHistory(int id);
   Future<Either<String, String>> deleteAddress(int id);
   Future<Either<String, AddressEntity>> detailAddress(int id);
   Future<Either<String, List<BannerCarouselEntity>>> getListCarouselBanner();
@@ -123,5 +129,14 @@ abstract class RepositoriesDomain {
     required String email,
     required String pass,
     required String confirmPass,
+  });
+
+  Future<Either<String, List<NotificationEntity>>> getListNotif();
+  Future<Either<String, String>> readListNotif(List<int> notifId);
+  Future<Either<String, String>> sendNotif({
+    required String title,
+    required String body,
+    required String message,
+    required int userId,
   });
 }

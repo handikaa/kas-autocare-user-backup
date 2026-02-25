@@ -161,7 +161,7 @@ class _AddAddressPageState extends State<AddAddressPage> {
   @override
   Widget build(BuildContext context) {
     double maxH = MediaQuery.of(context).size.height;
-    double maxW = MediaQuery.of(context).size.width;
+
     return BlocListener<AddAddressCubit, AddAddressState>(
       listener: (context, state) {
         if (state is AddressLoading) {

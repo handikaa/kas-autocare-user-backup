@@ -4,8 +4,8 @@ import 'package:equatable/equatable.dart';
 import 'package:kas_autocare_user/data/model/service_model.dart';
 import 'package:kas_autocare_user/domain/entities/service_entity.dart';
 
-import '../../core/utils/share_method.dart';
-import '../../domain/entities/history_transaction_entity.dart';
+import '../../../core/utils/share_method.dart';
+import '../../../domain/entities/history/history_transaction_entity.dart';
 
 class HistoryTransactionModel extends Equatable {
   final int? id;
@@ -38,13 +38,11 @@ class HistoryTransactionModel extends Equatable {
   final DateTime? date;
   final List<TransactionItemModel>? transactionItems;
   final PaymentModel? payment;
-  // final MasterMemberModel? masterMember;
   final BranchModel? branchModel;
   final ShippingOrderModel? shippingOrderModel;
+  // // final MasterMemberModel? masterMember;
 
   const HistoryTransactionModel({
-    this.shippingOrderModel,
-    this.branchModel,
     this.id,
     this.userId,
     this.branchId,
@@ -74,6 +72,8 @@ class HistoryTransactionModel extends Equatable {
     this.customerId,
     this.date,
     this.transactionItems,
+    this.shippingOrderModel,
+    this.branchModel,
     this.payment,
     // this.masterMember,
   });
@@ -131,15 +131,16 @@ class HistoryTransactionModel extends Equatable {
         payment: json["payment"] == null
             ? null
             : PaymentModel.fromJson(json["payment"]),
-        // masterMember: json["master_member"] == null
-        //     ? null
-        //     : MasterMemberModel.fromJson(json["master_member"]),
+
         branchModel: json["branch"] == null
             ? null
             : BranchModel.fromJson(json["branch"]),
         shippingOrderModel: json["shipping_order"] == null
             ? null
             : ShippingOrderModel.fromJson(json["shipping_order"]),
+        // masterMember: json["master_member"] == null
+        //     ? null
+        //     : MasterMemberModel.fromJson(json["master_member"]),
       );
 
   HistoryTransactionEntity toEntity() => HistoryTransactionEntity(
@@ -299,6 +300,40 @@ class HistoryTransactionModel extends Equatable {
     payment,
     // masterMember,
   ];
+
+  const HistoryTransactionModel.empty()
+    : id = 0,
+      userId = 0,
+      branchId = 0,
+      businessUnitId = 0,
+      bussinesId = 0,
+      licensePlate = '',
+      vehicleType = '',
+      brand = '',
+      model = '',
+      color = '',
+      image = const <String>[],
+      code = '',
+      status = '',
+      cancelledAt = null,
+      cancellationReason = '',
+      scheduleDate = null,
+      scheduleTime = '',
+      isKasPlus = 0,
+      ownerName = '',
+      totalPrice = 0,
+      createdAt = null,
+      updatedAt = null,
+      discountId = 0,
+      finalPrice = 0,
+      membershipId = 0,
+      priceMember = 0,
+      customerId = 0,
+      date = null,
+      transactionItems = const <TransactionItemModel>[],
+      payment = const PaymentModel.empty(),
+      branchModel = const BranchModel.empty(),
+      shippingOrderModel = const ShippingOrderModel.empty();
 }
 
 class MasterMemberModel extends Equatable {
@@ -458,6 +493,23 @@ class PaymentModel extends Equatable {
     midtransTransactionId,
     businessUnitId,
   ];
+
+  const PaymentModel.empty()
+    : id = 0,
+      name = '',
+      amount = 0,
+      status = '',
+      data = '',
+      method = '',
+      service = '',
+      transactionNewsId = 0,
+      bussinesId = 0,
+      branchId = 0,
+      userId = 0,
+      customerId = 0,
+      customersId = 0,
+      midtransTransactionId = 0,
+      businessUnitId = 0;
 }
 
 class TransactionItemModel extends Equatable {
@@ -739,6 +791,41 @@ class TransactionItemModel extends Equatable {
     variantProductSizeNewsId,
     cartId,
   ];
+
+  const TransactionItemModel.empty()
+    : service = const ServiceModel.empty(),
+      packageVariantNewModel = const PackageVariantNewModel.empty(),
+      packageNewModel = const PackageNewModel.empty(),
+      variantProductSizeModel = const VariantProductSizeModel.empty(),
+      variantProductModel = const VariantProductModel.empty(),
+      branchProductNewsModel = const BranchProductNewsModel.empty(),
+      id = 0,
+      transactionNewsId = 0,
+      branchProductsId = 0,
+      branchProductNewsId = 0,
+      qty = 0,
+      packagesNewId = 0,
+      serviceNewsId = 0,
+      branchesId = 0,
+      bussinesId = 0,
+      slotNewsId = 0,
+      washerId = 0,
+      checkerId = 0,
+      isCompliment = 0,
+      itemType = '',
+      estimatedTime = 0,
+      startTime = null,
+      endTime = null,
+      size = '',
+      priceSize = 0,
+      facility = '',
+      price = 0,
+      description = '',
+      image = const <String>[],
+      productNewsId = 0,
+      variantProductNewsId = 0,
+      variantProductSizeNewsId = 0,
+      cartId = 0;
 }
 
 class BranchModel extends Equatable {
@@ -839,6 +926,24 @@ class BranchModel extends Equatable {
     status,
     districtId,
   ];
+
+  const BranchModel.empty()
+    : id = 0,
+      ownershipModelId = 0,
+      revenueModelId = 0,
+      bussinesUnitId = 0,
+      chargeFee = 0,
+      businessTypeId = 0,
+      name = '',
+      storeName = '',
+      ownerName = '',
+      address = '',
+      province = '',
+      city = '',
+      district = '',
+      bussinesId = 0,
+      status = '',
+      districtId = 0;
 }
 
 class BranchProductNewsModel extends Equatable {
@@ -952,6 +1057,26 @@ class BranchProductNewsModel extends Equatable {
     category,
     sku,
   ];
+
+  const BranchProductNewsModel.empty()
+    : id = 0,
+      branchId = 0,
+      bussinesId = 0,
+      businessUnitId = 0,
+      name = '',
+      qty = 0,
+      type = '',
+      image = const <String>[],
+      price = 0,
+      hpp = 0,
+      status = false,
+      description = '',
+      isCod = false,
+      remarks = '',
+      minOrder = 0,
+      maxOrder = 0,
+      category = '',
+      sku = '';
 }
 
 class VariantProductModel extends Equatable {
@@ -987,6 +1112,12 @@ class VariantProductModel extends Equatable {
 
   @override
   List<Object?> get props => [id, productNewsId, branchProductNewsId, name];
+
+  const VariantProductModel.empty()
+    : id = 0,
+      productNewsId = 0,
+      branchProductNewsId = 0,
+      name = '';
 }
 
 class VariantProductSizeModel extends Equatable {
@@ -1046,6 +1177,15 @@ class VariantProductSizeModel extends Equatable {
     createdBy,
     qty,
   ];
+
+  const VariantProductSizeModel.empty()
+    : id = 0,
+      variantProductNewsId = 0,
+      size = '',
+      price = 0,
+      branchProductNewsId = 0,
+      createdBy = 0,
+      qty = 0;
 }
 
 class PackageNewModel extends Equatable {
@@ -1110,6 +1250,17 @@ class PackageNewModel extends Equatable {
     description,
     price,
   ];
+
+  const PackageNewModel.empty()
+    : id = 0,
+      name = '',
+      vehicleType = '',
+      isWashingType = 0,
+      estimatedTime = 0,
+      branchId = 0,
+      bussinesId = 0,
+      description = '',
+      price = 0;
 }
 
 class PackageVariantNewModel extends Equatable {
@@ -1175,6 +1326,16 @@ class PackageVariantNewModel extends Equatable {
     isPrimary,
     variantType,
   ];
+
+  const PackageVariantNewModel.empty()
+    : id = 0,
+      packageVariantTypeNewId = 0,
+      packageNewsId = 0,
+      size = '',
+      facility = '',
+      price = 0,
+      isPrimary = 0,
+      variantType = const VariantTypeModel.empty();
 }
 
 class VariantTypeModel extends Equatable {
@@ -1202,6 +1363,7 @@ class VariantTypeModel extends Equatable {
 
   @override
   List<Object?> get props => [id, packageNewsId, type];
+  const VariantTypeModel.empty() : id = 0, packageNewsId = 0, type = '';
 }
 
 class ShippingOrderModel extends Equatable {
@@ -1370,4 +1532,34 @@ class ShippingOrderModel extends Equatable {
     shippedAt,
     deliveredAt,
   ];
+  const ShippingOrderModel.empty()
+    : serviceCode = '',
+      id = 0,
+      transactionNewsId = 0,
+      shippingCouriersId = 0,
+      autokirimOrderId = 0,
+      trackingNumber = '',
+      courierService = '',
+      originName = '',
+      originPhone = '',
+      originAddress = '',
+      originProvinceName = '',
+      originCityName = '',
+      originDistrictName = '',
+      originVillageName = '',
+      originPostalCode = '',
+      destinationName = '',
+      destinationPhone = '',
+      destinationAddress = '',
+      destinationProvinceName = '',
+      destinationCityName = '',
+      destinationDistrictName = '',
+      destinationVillageName = '',
+      destinationPostalCode = '',
+      shippingCost = 0,
+      insuranceCost = 0.0,
+      status = '',
+      note = '',
+      shippedAt = '',
+      deliveredAt = '';
 }

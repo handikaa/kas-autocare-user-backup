@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:kas_autocare_user/domain/entities/history_transaction_entity.dart';
+import 'package:kas_autocare_user/domain/entities/history/history_transaction_entity.dart';
 
 import '../../data/params/history_params.dart';
 import '../repositories/repositories_domain.dart';

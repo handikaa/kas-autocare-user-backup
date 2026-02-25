@@ -1,16 +1,18 @@
-import 'dart:developer';
-
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:kas_autocare_user/presentation/cubit/notification/send_notification_cubit.dart';
 import 'package:location_picker_flutter_map/location_picker_flutter_map.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'core/config/inject/depedency_injection.dart';
 import 'core/config/theme/app_theme.dart';
+import 'core/config/utils/payment_service_websocket.dart';
 import 'core/utils/api_constant.dart';
 import 'data/datasource/local/auth_local_data_source.dart';
 import 'data/dummy/dummy_payment_method.dart';
@@ -33,6 +35,7 @@ import 'domain/usecase/fetch_list_vehicle_cust.dart';
 import 'domain/usecase/fetch_list_vmodel.dart';
 import 'domain/usecase/get_list_district.dart';
 import 'domain/usecase/update_address.dart';
+import 'firebase_options.dart';
 import 'presentation/cubit/add_address_cubit.dart';
 import 'presentation/cubit/brand_cubit.dart';
 import 'presentation/cubit/cart_cubit.dart';
@@ -54,6 +57,7 @@ import 'presentation/cubit/logout_cubit.dart';
 import 'presentation/cubit/merchant_nearby_cubit.dart';
 import 'presentation/cubit/model_cubit.dart';
 import 'presentation/cubit/package_cubit.dart';
+import 'presentation/cubit/payment_ws/payment_ws_cubit.dart';
 import 'presentation/cubit/product_cubit.dart';
 import 'presentation/cubit/register_cubit.dart';
 import 'presentation/cubit/service_cubit.dart';
@@ -74,6 +78,7 @@ import 'presentation/pages/history/history_page.dart';
 import 'presentation/pages/home_page/home_page.dart';
 import 'presentation/pages/intro_page/intro_page.dart';
 import 'presentation/pages/login/login_page.dart';
+import 'presentation/pages/notification/notification_page.dart';
 import 'presentation/pages/opm/opm_page.dart';
 import 'presentation/pages/payment_information/payment_information.dart';
 import 'presentation/pages/payment_method.dart/select_payment_method.dart';
@@ -82,8 +87,8 @@ import 'presentation/pages/ppob/detail_ppob_page.dart';
 import 'presentation/pages/ppob/input_ppob_listrik.dart';
 import 'presentation/pages/ppob/input_ppob_pdam.dart';
 import 'presentation/pages/ppob/ppob.dart';
-import 'presentation/pages/product/product_detail.dart';
 import 'presentation/pages/product/detail_transaction_product.dart';
+import 'presentation/pages/product/product_detail.dart';
 import 'presentation/pages/product/product_page.dart';
 import 'presentation/pages/product/product_reviews.dart';
 import 'presentation/pages/product/tracking_product.dart';
@@ -97,15 +102,21 @@ import 'presentation/pages/service/find_location.dart';
 import 'presentation/pages/service/service_page.dart';
 import 'presentation/pages/splash/splashscreen.dart';
 import 'presentation/pages/voucher/voucher_page.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('id_ID', null);
 
-  final fcmToken = await FirebaseMessaging.instance.getToken();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  log(fcmToken ?? "+", name: "TOKEN FCM");
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    throw StateError(
+      "Gagal load .env. Pastikan file .env ada dan sudah didaftarkan di pubspec.yaml.\n"
+      "Detail: $e",
+    );
+  }
 
   await GeolocatorPlatform.instance.isLocationServiceEnabled();
   await init(ApiConstant.baseUrl);
@@ -230,6 +241,10 @@ class MyApp extends StatelessWidget {
         builder: (context, state) => const Dashboard(),
       ),
       GoRoute(
+        path: '/notification',
+        builder: (context, state) => const NotificationPage(),
+      ),
+      GoRoute(
         path: '/service',
         builder: (context, state) => MultiBlocProvider(
           providers: [
@@ -277,8 +292,14 @@ class MyApp extends StatelessWidget {
         builder: (context, state) {
           final data = state.extra as PaymentData;
 
-          return BlocProvider(
-            create: (_) => sl<GenerateQrCubit>(),
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider(create: (_) => sl<GenerateQrCubit>()),
+              BlocProvider(create: (_) => sl<SendNotificationCubit>()),
+              BlocProvider(
+                create: (_) => PaymentWsCubit(sl<PaymentWsService>()),
+              ),
+            ],
             child: PaymentInformationPage(data: data),
           );
         },
@@ -294,6 +315,7 @@ class MyApp extends StatelessWidget {
                     sl<DetailHistoryCubit>()..getDetailHistory(data.id),
               ),
               BlocProvider(create: (_) => sl<GenerateQrCubit>()),
+              BlocProvider(create: (_) => sl<SendNotificationCubit>()),
             ],
             child: DetailBookingTransactionPage(data: data),
           );

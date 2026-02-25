@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/params/booking_payload.dart';
+import '../../domain/entities/transaction/transaction_entity.dart';
 import '../../domain/usecase/create_booking_customer.dart';
 
 part 'create_booking_state.dart';

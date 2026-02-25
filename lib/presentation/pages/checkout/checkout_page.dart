@@ -166,6 +166,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
           PaymentData dataPayment = PaymentData(
             id: state.data,
             type: 'product',
+
             subMerchant: chart?.branch.subMerchant?.idMerchant ?? 0,
           );
           context.go('/payment-information', extra: dataPayment);

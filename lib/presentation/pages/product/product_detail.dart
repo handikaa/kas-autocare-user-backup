@@ -97,7 +97,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           }
           if (state is DetailProductSuccess) {
             ProductEntity product = state.product;
-            Product dummyP = dummyProduct;
+
             if (_selectedVariant == null && product.variants.isNotEmpty) {
               _selectedVariant = product.variants.first;
               if (_selectedVariant!.sizes.isNotEmpty) {
@@ -120,7 +120,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           }
           if (state is DetailProductSuccess) {
             ProductEntity product = state.product;
-            Product dummyP = dummyProduct;
+
             if (_selectedVariant == null && product.variants.isNotEmpty) {
               _selectedVariant = product.variants.first;
               if (_selectedVariant!.sizes.isNotEmpty) {

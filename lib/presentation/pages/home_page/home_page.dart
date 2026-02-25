@@ -2,15 +2,15 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:kas_autocare_user/core/config/theme/app_text_style.dart';
-import 'package:kas_autocare_user/domain/usecase/banner_carousel/get_list_banner_carousel_usecase.dart';
-import 'package:kas_autocare_user/presentation/cubit/banner_carousel_cubit/get_list_banner_cubit.dart';
-import 'package:kas_autocare_user/presentation/cubit/get_detail_user_cubit.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../core/config/assets/app_icons.dart' hide ImageFormater;
 import '../../../core/config/assets/app_images.dart';
 import '../../../core/config/theme/app_colors.dart';
+import '../../../core/config/theme/app_text_style.dart';
+import '../../cubit/banner_carousel_cubit/get_list_banner_cubit.dart';
+import '../../cubit/get_detail_user_cubit.dart';
+import '../../cubit/notification/get_list_notification_cubit.dart';
 import '../../widget/widget.dart';
 
 class HomePage extends StatefulWidget {
@@ -20,7 +20,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   List dataMenu = [
     {
       "title": "Layanan Cuci",
@@ -35,13 +35,36 @@ class _HomePageState extends State<HomePage> {
     // },
   ];
 
-  final List<String> banners = ["Banner 1", "Banner 2", "Banner 3"];
-
   int _currentIndex = 0;
 
   Future<void> onRefresh() async {
     context.read<GetDetailUserCubit>().fetchDetailUser();
     context.read<GetListBannerCubit>().execute();
+    context.read<GetListNotificationCubit>().getListNotif();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!mounted) return;
+
+    if (state == AppLifecycleState.resumed) {
+      // optional: supaya tidak bentrok dengan build pertama
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) onRefresh();
+      });
+    }
   }
 
   @override
@@ -69,7 +92,24 @@ class _HomePageState extends State<HomePage> {
 
                 Column(
                   children: [
-                    _profileAppbar(),
+                    BlocBuilder<
+                      GetListNotificationCubit,
+                      GetListNotificationState
+                    >(
+                      builder: (context, state) {
+                        bool isNewNotif = false;
+
+                        if (state is GetListNotifSuccess) {
+                          for (var notif in state.data) {
+                            if (notif.isRead == 0) {
+                              isNewNotif = true;
+                            }
+                          }
+                        }
+
+                        return _profileAppbar(isNewNotif);
+                      },
+                    ),
                     AppGap.height(heightDevice * 0.01),
 
                     // _findNearbyCarwash(widthDevice),
@@ -113,13 +153,158 @@ class _HomePageState extends State<HomePage> {
                   img: AppImages.path('carwash', format: ImageFormater.jpg),
                   rating: 3.2,
                   text: "Carwash Cilebut",
-                  type: 0,
+                  type: '',
                   isOpen: false,
                 ),
               );
             }),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _profileAppbar(bool isNewNotif) {
+    return Padding(
+      padding: AppPadding.all(16),
+      child: BlocBuilder<GetDetailUserCubit, GetDetailUserState>(
+        builder: (context, state) {
+          if (state is GetDetailUserLoading) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 28,
+                      backgroundColor: AppColors.common.white,
+                      child: AppIcon(
+                        size: 32,
+                        color: AppColors.light.primary,
+                        icon: Icons.person,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Text(
+                          "----",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          "Selamat Datang Kembali",
+                          style: TextStyle(color: Colors.white70, fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            );
+          }
+          if (state is GetDetailUserError) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AppText(
+                  state.message,
+                  variant: TextVariant.heading7,
+                  weight: TextWeight.semiBold,
+                  color: AppColors.light.error,
+                ),
+              ],
+            );
+          }
+          if (state is GetDetailUserLoading) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AppText(
+                  "Loading",
+                  variant: TextVariant.heading7,
+                  weight: TextWeight.semiBold,
+                  color: AppColors.light.error,
+                ),
+              ],
+            );
+          }
+
+          if (state is GetDetailUserSuccess) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 28,
+                      backgroundColor: AppColors.common.white,
+                      child: AppIcon(
+                        size: 32,
+                        color: AppColors.light.primary,
+                        icon: Icons.person,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          state.data.name,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          "Selamat Datang Kembali",
+                          style: TextStyle(color: Colors.white70, fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                Spacer(),
+                InkWell(
+                  onTap: () async {
+                    var res = await context.push('/notification');
+
+                    if (res == null) {
+                      context.read<GetListNotificationCubit>().getListNotif();
+                    }
+                  },
+                  child: Stack(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: AppColors.common.white,
+                        child: Icon(
+                          Icons.notifications,
+                          color: AppColors.light.primary,
+                        ),
+                      ),
+                      if (isNewNotif)
+                        Positioned(
+                          right: 0,
+                          child: CircleAvatar(
+                            radius: 7,
+                            backgroundColor: AppColors.light.error,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          }
+          return SizedBox.shrink();
+        },
       ),
     );
   }
@@ -182,7 +367,7 @@ class _HomePageState extends State<HomePage> {
               AppGap.height(10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(banners.length, (index) {
+                children: List.generate(data.length, (index) {
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
                     margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -385,109 +570,6 @@ class _HomePageState extends State<HomePage> {
             AppGap.width(10),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _profileAppbar() {
-    return Padding(
-      padding: AppPadding.all(16),
-      child: BlocBuilder<GetDetailUserCubit, GetDetailUserState>(
-        builder: (context, state) {
-          if (state is GetDetailUserLoading) {
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 28,
-                      backgroundColor: AppColors.common.white,
-                      child: AppIcon(
-                        size: 32,
-                        color: AppColors.light.primary,
-                        icon: Icons.person,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Text(
-                          "----",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        Text(
-                          "Selamat Datang Kembali",
-                          style: TextStyle(color: Colors.white70, fontSize: 14),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            );
-          }
-          if (state is GetDetailUserError) {
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                AppText(
-                  state.message,
-                  variant: TextVariant.heading7,
-                  weight: TextWeight.semiBold,
-                  color: AppColors.light.error,
-                ),
-              ],
-            );
-          }
-
-          if (state is GetDetailUserSuccess) {
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 28,
-                      backgroundColor: AppColors.common.white,
-                      child: AppIcon(
-                        size: 32,
-                        color: AppColors.light.primary,
-                        icon: Icons.person,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          state.data.name,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        Text(
-                          "Selamat Datang Kembali",
-                          style: TextStyle(color: Colors.white70, fontSize: 14),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            );
-          }
-          return SizedBox.shrink();
-        },
       ),
     );
   }

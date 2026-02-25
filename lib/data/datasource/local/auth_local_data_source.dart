@@ -4,6 +4,7 @@ class AuthLocalDataSource {
   final _local = LocalStorageService();
 
   static const _tokenKey = "auth_token";
+  static const _tokenFCM = "fcm_token";
   static const _userIdKey = "user_id";
   static const _customerIdKey = "customer_id";
   static const _introKey = "intro_completed";
@@ -43,8 +44,17 @@ class AuthLocalDataSource {
     return result == "true";
   }
 
+  Future<void> saveTokenFCM(String token) async {
+    await _local.saveEncrypted(_tokenFCM, token);
+  }
+
+  Future<String?> getTokenFCM() async {
+    return await _local.readDecrypted(_tokenFCM);
+  }
+
   Future<void> clearAuth() async {
     await _local.delete(_tokenKey);
     await _local.delete(_userIdKey);
+    await _local.delete(_tokenFCM);
   }
 }

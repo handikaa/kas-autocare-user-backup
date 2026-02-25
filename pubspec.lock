@@ -593,13 +593,13 @@ packages:
     source: hosted
     version: "0.2.8"
   http:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: http
-      sha256: bb2ce4590bc2667c96f318d68cac1b5a7987ec819351d32b1c987239a815e007
+      sha256: "87721a4a50b19c7f1d49001e51409bddc46303966ce89a65af4f4e6004896412"
       url: "https://pub.dev"
     source: hosted
-    version: "1.5.0"
+    version: "1.6.0"
   http_parser:
     dependency: transitive
     description:
@@ -1000,6 +1000,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.0"
+  pusher_channels_flutter:
+    dependency: "direct main"
+    description:
+      name: pusher_channels_flutter
+      sha256: "0b06194d85d1665d21e634ea091917b28670fb6d585d76903a4f72d894906000"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.0"
   saver_gallery:
     dependency: "direct main"
     description:

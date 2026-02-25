@@ -20,6 +20,7 @@ class _SplashscreenState extends State<Splashscreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<SplashCubit>().start();
+      context.read<SplashCubit>().bootstrap();
     });
   }
 

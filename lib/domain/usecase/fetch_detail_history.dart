@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
-import 'package:kas_autocare_user/domain/entities/history_transaction_entity.dart';
 
+import '../entities/history/history_entity.dart';
 import '../repositories/repositories_domain.dart';
 
 class FetchDetailHistory {
@@ -8,7 +8,7 @@ class FetchDetailHistory {
 
   FetchDetailHistory(this.repositoriesDomain);
 
-  Future<Either<String, HistoryTransactionEntity>> execute(int id) async {
+  Future<Either<String, HistoryEntity>> execute(int id) async {
     return await repositoriesDomain.getDetailHistory(id);
   }
 }

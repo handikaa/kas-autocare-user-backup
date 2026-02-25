@@ -1,7 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../domain/entities/history_transaction_entity.dart';
+import '../../domain/entities/history/history_entity.dart';
+import '../../domain/entities/history/history_transaction_entity.dart';
 import '../../domain/usecase/fetch_detail_history.dart';
 
 part 'detail_history_state.dart';

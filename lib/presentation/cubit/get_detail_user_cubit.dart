@@ -1,7 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kas_autocare_user/domain/entities/user_entity.dart';
-import 'package:kas_autocare_user/domain/usecase/get_detail_user.dart';
+
+import '../../domain/entities/user_entity.dart';
+import '../../domain/usecase/get_detail_user.dart';
 
 part 'get_detail_user_state.dart';
 

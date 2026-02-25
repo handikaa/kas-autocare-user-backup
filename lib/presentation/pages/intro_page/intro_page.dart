@@ -2,7 +2,6 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sentry/sentry.dart';
 
 import '../../../core/config/theme/app_text_style.dart';
 import '../../../data/datasource/local/intro_data.dart';

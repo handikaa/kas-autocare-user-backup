@@ -1,20 +1,17 @@
-import 'dart:developer';
-import 'dart:typed_data';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:kas_autocare_user/data/model/payment_data.dart';
 import 'package:saver_gallery/saver_gallery.dart';
 
 import '../../../core/config/theme/app_colors.dart';
 import '../../../core/config/theme/app_text_style.dart';
 import '../../../core/utils/app_snackbar.dart';
 import '../../../core/utils/share_method.dart';
+import '../../../data/model/payment_data.dart';
 import '../../../data/params/winpay_response_convert.dart';
-import '../../../domain/entities/history_transaction_entity.dart';
+import '../../../domain/entities/history/history_transaction_entity.dart';
 import '../../cubit/detail_history_cubit.dart';
 import '../../cubit/generate_qr_cubit.dart';
 import '../../widget/card/product_transaction_card.dart';
@@ -181,15 +178,17 @@ class _DetailTransactionProductState extends State<DetailTransactionProduct> {
               }
               if (state is DetailHistoryLoaded) {
                 final data = state.data;
+                HistoryTransactionEntity historyTransaction =
+                    data.historyTransactionEntity;
 
-                if (data.payment.data != "") {
-                  final rawDataString = data.payment.data;
+                if (historyTransaction.payment.data != "") {
+                  final rawDataString = historyTransaction.payment.data;
 
                   parsedData = WinpayResponseProduct.fromRawJson(rawDataString);
                 }
                 final List<TransactionItemEntity>? products =
-                    data.transactionItems.isNotEmpty
-                    ? data.transactionItems
+                    historyTransaction.transactionItems.isNotEmpty
+                    ? historyTransaction.transactionItems
                           .where((e) => e.itemType == 'product')
                           .toList()
                     : null;
@@ -197,8 +196,8 @@ class _DetailTransactionProductState extends State<DetailTransactionProduct> {
                 return Column(
                   children: [
                     _buildInformationStatusTransaction(
-                      data: data,
-                      payment: data.payment,
+                      data: historyTransaction,
+                      payment: historyTransaction.payment,
                       onTap: () {
                         if (parsedData == null) {
                           showAppSnackBar(
@@ -213,12 +212,15 @@ class _DetailTransactionProductState extends State<DetailTransactionProduct> {
                     ),
 
                     _buildProductCard(products),
-                    _buildCardInformationOrder(data.shippingOrder),
+                    _buildCardInformationOrder(
+                      historyTransaction.shippingOrder,
+                    ),
                     _buildCardRincianPriceOrder(
-                      payMethod: data.payment.method,
-                      subTotalProduct: data.totalPrice,
-                      totalExpedition: data.shippingOrder.shippingCost,
-                      totalPriceProduct: data.finalPrice,
+                      payMethod: historyTransaction.payment.method,
+                      subTotalProduct: historyTransaction.totalPrice,
+                      totalExpedition:
+                          historyTransaction.shippingOrder.shippingCost,
+                      totalPriceProduct: historyTransaction.finalPrice,
                     ),
 
                     AppGap.height(12),
@@ -439,7 +441,9 @@ class _DetailTransactionProductState extends State<DetailTransactionProduct> {
       child: BlocBuilder<DetailHistoryCubit, DetailHistoryState>(
         builder: (context, state) {
           if (state is DetailHistoryLoaded) {
-            if (state.data.payment.data == '') {
+            HistoryTransactionEntity historyTransaction =
+                state.data.historyTransactionEntity;
+            if (historyTransaction.payment.data == '') {
               return Container(
                 color: AppColors.light.background,
                 child: SafeArea(

@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 
 import '../../data/params/booking_payload.dart';
+import '../entities/transaction/transaction_entity.dart';
 import '../repositories/repositories_domain.dart';
 
 class CreateBookingCustomer {
@@ -8,7 +9,9 @@ class CreateBookingCustomer {
 
   CreateBookingCustomer(this.repositoriesDomain);
 
-  Future<Either<String, int>> execute(BookingPayload payload) async {
+  Future<Either<String, TransactionEntity>> execute(
+    BookingPayload payload,
+  ) async {
     return await repositoriesDomain.createBooking(payload);
   }
 }

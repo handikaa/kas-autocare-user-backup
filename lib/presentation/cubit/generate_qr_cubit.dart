@@ -1,10 +1,9 @@
-import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kas_autocare_user/domain/entities/qr_product_entity.dart';
-import 'package:kas_autocare_user/domain/usecase/generate_qr_service.dart';
 
+import '../../domain/entities/qr_product_entity.dart';
 import '../../domain/usecase/generate_qr_product.dart';
+import '../../domain/usecase/generate_qr_service.dart';
 
 part 'generate_qr_state.dart';
 

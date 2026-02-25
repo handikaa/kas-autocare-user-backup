@@ -12,7 +12,7 @@ class DetailHistoryInitial extends DetailHistoryState {}
 class DetailHistoryLoading extends DetailHistoryState {}
 
 class DetailHistoryLoaded extends DetailHistoryState {
-  final HistoryTransactionEntity data;
+  final HistoryEntity data;
 
   const DetailHistoryLoaded(this.data);
 

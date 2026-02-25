@@ -5,7 +5,8 @@ class DioClient {
 
   DioClient(this.baseUrl);
 
-  Dio get dio => _createDio();
+  late final Dio _dio = _createDio();
+  Dio get dio => _dio;
 
   Dio _createDio() {
     final dio = Dio(

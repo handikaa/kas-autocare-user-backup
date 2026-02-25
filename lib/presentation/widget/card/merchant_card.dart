@@ -8,7 +8,7 @@ import 'package:kas_autocare_user/presentation/widget/text/app_text.dart';
 
 class MerchantCard extends StatelessWidget {
   final String? text;
-  final int? type;
+  final String type;
   final String img;
   final double? rating;
   final bool isSelected;
@@ -18,7 +18,7 @@ class MerchantCard extends StatelessWidget {
   const MerchantCard({
     super.key,
     this.text,
-    this.type,
+    required this.type,
     this.rating,
     this.isSelected = false,
     required this.img,
@@ -69,9 +69,12 @@ class MerchantCard extends StatelessWidget {
                 ),
                 AppGap.height(4),
                 AppText(
-                  type == 0 ? "Populer" : "Pelayanan Terbaik",
+                  align: TextAlign.left,
+                  maxLines: 2,
+                  type,
+                  // type == 0 ? "Populer" : "Pelayanan Terbaik",
                   variant: TextVariant.body3,
-                  weight: TextWeight.bold,
+                  weight: TextWeight.medium,
                 ),
                 AppGap.height(4),
                 AppText(
