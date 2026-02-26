@@ -69,7 +69,6 @@ class _DetailBookingTransactionPageState
       return;
     }
 
-    // 🔥 update loading di dialog
     dialogSetState(() => isLoading = true);
 
     try {

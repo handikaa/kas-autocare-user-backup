@@ -166,7 +166,7 @@ class _PaymentInformationPageState extends State<PaymentInformationPage>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    // jangan emit idle saat dispose (seperti yang sudah kita rapikan)
+
     _wsCubit.stopListening(emitIdle: false);
     super.dispose();
   }
@@ -176,7 +176,6 @@ class _PaymentInformationPageState extends State<PaymentInformationPage>
     if (!mounted) return;
 
     if (state == AppLifecycleState.resumed) {
-      // 1) pastikan WS masih listen (reconnect kalau perlu)
       _wsCubit.ensureListening(widget.data.code ?? "");
 
       // 2) fallback cek status via API (jika payment terjadi saat background)
@@ -215,26 +214,17 @@ class _PaymentInformationPageState extends State<PaymentInformationPage>
             listenWhen: (prev, curr) => prev.status != curr.status,
             listener: (context, wsState) {
               if (wsState.status == PaymentWsStatus.paid) {
-                context.read<PaymentWsCubit>().stopListening(
-                  emitIdle: false,
-                ); // stop tanpa emit
+                context.read<PaymentWsCubit>().stopListening(emitIdle: false);
 
-                // context.go('/dashboard'); atau tampilkan dialog/snackbar
                 showAppSnackBar(
                   context,
                   message: "Pembayaran Berhasil",
                   type: SnackType.success,
                 );
                 context.go('/detail-booking-transaction', extra: widget.data);
-
-                // _sendNotifFcm(
-                //   plate: widget.data.plate ?? "-",
-                //   userId: widget.data.userId ?? 0,
-                // );
               }
 
               if (wsState.status == PaymentWsStatus.error) {
-                // contoh aksi ketika error
                 showAppSnackBar(
                   context,
                   message: wsState.error ?? "Error Pembayaran",
