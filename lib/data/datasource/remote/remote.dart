@@ -290,14 +290,9 @@ class RemoteDataImpl implements Remote {
     Map<String, dynamic>? qparams = {
       "bussines_id": bsnisId,
       "branch_id": brnchId,
-      "brand":
-          // 'BMW',
-          brand,
-      "model":
-          // 'X1',
-          model,
-      "vehicle_type": "car",
-      // vType,
+      "brand": brand,
+      "model": model,
+      "vehicle_type": vType,
     };
 
     await getLocal();
