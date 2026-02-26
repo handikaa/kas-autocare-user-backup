@@ -226,11 +226,6 @@ class _PaymentInformationPageState extends State<PaymentInformationPage>
                   type: SnackType.success,
                 );
                 context.go('/detail-booking-transaction', extra: widget.data);
-
-                // _sendNotifFcm(
-                //   plate: widget.data.plate ?? "-",
-                //   userId: widget.data.userId ?? 0,
-                // );
               }
 
               if (wsState.status == PaymentWsStatus.error) {
