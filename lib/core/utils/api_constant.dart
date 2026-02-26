@@ -1,7 +1,7 @@
 class ApiConstant {
-  // static const String baseUrl = 'https://api-clean.buitentech.co.id/api'; // dev
-  static const String baseUrl =
-      'https://autocare-api.kasprima.co.id/api'; // prod
+  static const String baseUrl = 'https://api-clean.buitentech.co.id/api'; // dev
+  // static const String baseUrl =
+  //     'https://autocare-api.kasprima.co.id/api'; // prod
   static const String sentry =
       'https://93caaf5c25829d3c384c22365579ace6@o4505861416419328.ingest.us.sentry.io/4510162994659328';
 
