@@ -10,7 +10,6 @@ class RegisterPayload {
   final String email;
   final String password;
   final String passwordConfirmation;
-
   final String otp;
 
   RegisterPayload({

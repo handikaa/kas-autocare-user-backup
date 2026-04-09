@@ -52,7 +52,7 @@ class _IntroViewState extends State<_IntroView> {
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(20),
                   height: MediaQuery.of(context).size.height * 0.35,
                   decoration: const BoxDecoration(
                     color: Colors.white,
@@ -102,47 +102,51 @@ class _IntroViewState extends State<_IntroView> {
                         ),
                       ),
 
-                      Row(
-                        children: [
-                          if (currentIndex != 0) ...[
-                            Expanded(
-                              child: AppElevatedButton(
-                                text: "Kembali",
-                                onPressed: () {
-                                  context.read<IntroCubit>().prevPage();
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                          ],
-
-                          Expanded(
-                            child: AnimatedSize(
-                              duration: const Duration(milliseconds: 500),
-                              curve: Curves.elasticOut,
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 500),
-                                curve: Curves.easeInOut,
-
-                                width: currentIndex != 0
-                                    ? double.infinity * 0.8
-                                    : double.infinity,
+                      SafeArea(
+                        child: Row(
+                          children: [
+                            if (currentIndex != 0) ...[
+                              Expanded(
                                 child: AppElevatedButton(
-                                  text: currentIndex == pages.length - 1
-                                      ? "Mulai"
-                                      : "Lanjut",
-                                  onPressed: () async {
-                                    if (currentIndex == pages.length - 1) {
-                                      context.read<SplashCubit>().finishIntro();
-                                    } else {
-                                      context.read<IntroCubit>().nextPage();
-                                    }
+                                  text: "Kembali",
+                                  onPressed: () {
+                                    context.read<IntroCubit>().prevPage();
                                   },
                                 ),
                               ),
+                              const SizedBox(width: 12),
+                            ],
+
+                            Expanded(
+                              child: AnimatedSize(
+                                duration: const Duration(milliseconds: 500),
+                                curve: Curves.elasticOut,
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 500),
+                                  curve: Curves.easeInOut,
+
+                                  width: currentIndex != 0
+                                      ? double.infinity * 0.8
+                                      : double.infinity,
+                                  child: AppElevatedButton(
+                                    text: currentIndex == pages.length - 1
+                                        ? "Mulai"
+                                        : "Lanjut",
+                                    onPressed: () async {
+                                      if (currentIndex == pages.length - 1) {
+                                        context
+                                            .read<SplashCubit>()
+                                            .finishIntro();
+                                      } else {
+                                        context.read<IntroCubit>().nextPage();
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),
