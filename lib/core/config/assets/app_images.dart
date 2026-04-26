@@ -16,6 +16,7 @@ class AppImages {
   static final sampel = path('sampel');
   static final qris = path('qris');
   static final baner = path('baner');
+  static final comingSoon = path('coming-soon');
 }
 
 enum ImageFormater { jpg, png, jpeg }

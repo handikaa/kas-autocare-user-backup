@@ -322,72 +322,110 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         if (state is GetListBannerSuccess) {
           var data = state.data;
 
-          return Column(
-            children: [
-              CarouselSlider(
-                options: CarouselOptions(
-                  height: 170,
-                  autoPlay: true,
-                  enlargeCenterPage: false,
-                  viewportFraction: 0.9,
-                  onPageChanged: (index, reason) {
-                    setState(() {
-                      _currentIndex = index;
-                    });
-                  },
-                ),
-                items: data.map((banner) {
-                  return Builder(
-                    builder: (BuildContext context) {
-                      return Container(
-                        width: MediaQuery.of(context).size.width,
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 6.0,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 6,
-                              offset: const Offset(0, 5),
-                            ),
-                          ],
-                          image: DecorationImage(
-                            image: NetworkImage(banner.image),
-                            fit: BoxFit.cover,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      );
+          if (state.data.isEmpty) {
+            return _comingSoonCarousel();
+          } else {
+            return Column(
+              children: [
+                CarouselSlider(
+                  options: CarouselOptions(
+                    height: 170,
+                    autoPlay: true,
+                    enlargeCenterPage: false,
+                    viewportFraction: 0.9,
+                    onPageChanged: (index, reason) {
+                      setState(() {
+                        _currentIndex = index;
+                      });
                     },
-                  );
-                }).toList(),
-              ),
-              AppGap.height(10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(data.length, (index) {
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    height: 8,
-                    width: _currentIndex == index ? 20 : 8,
-                    decoration: BoxDecoration(
-                      color: _currentIndex == index
-                          ? AppColors.light.primary
-                          : Colors.grey,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                  );
-                }),
-              ),
-            ],
-          );
+                  ),
+                  items: data.map((banner) {
+                    return Builder(
+                      builder: (BuildContext context) {
+                        return Container(
+                          width: MediaQuery.of(context).size.width,
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 6.0,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 6,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                            image: DecorationImage(
+                              image: NetworkImage(banner.image),
+                              fit: BoxFit.cover,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        );
+                      },
+                    );
+                  }).toList(),
+                ),
+                AppGap.height(10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(data.length, (index) {
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      height: 8,
+                      width: _currentIndex == index ? 20 : 8,
+                      decoration: BoxDecoration(
+                        color: _currentIndex == index
+                            ? AppColors.light.primary
+                            : Colors.grey,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    );
+                  }),
+                ),
+              ],
+            );
+          }
         }
 
-        return SizedBox.shrink();
+        return _comingSoonCarousel();
       },
+    );
+  }
+
+  Widget _comingSoonCarousel() {
+    return Column(
+      children: [
+        CarouselSlider(
+          options: CarouselOptions(
+            height: 170,
+            autoPlay: false,
+            viewportFraction: 0.9,
+          ),
+          items: [
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 10),
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 6,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+                image: DecorationImage(
+                  image: AssetImage(AppImages.comingSoon),
+                  fit: BoxFit.cover,
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
